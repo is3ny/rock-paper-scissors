@@ -67,6 +67,16 @@ std::string Window::Title()
     return m_title;
 }
 
+int Window::Width()
+{
+    return m_width;
+}
+
+int Window::Height()
+{
+    return m_height;
+}
+
 void Window::SetTitle(const std::string& newTitle)
 {
     m_title = newTitle;

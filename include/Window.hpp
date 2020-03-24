@@ -14,6 +14,10 @@ public:
     int ShouldClose();
     void Close();
     std::string Title();
+    /// In pixels
+    int Width();
+    /// In pixels
+    int Height();
     void SetTitle(const std::string& newTitle);
     void SwapBuffers();
     void PollEvents();
