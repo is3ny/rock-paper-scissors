@@ -19,7 +19,7 @@ public:
     // Constructor: sets default texture modes and generates an id
     Texture();
     // Generates texture from image data with the above parameters
-    void Generate(GLuint width, GLuint height, unsigned char * data);
+    void Generate(unsigned char * data, GLuint width = 0, GLuint height = 0);
     // Binds the texture as the current GL_TEXTURE_2D texture object
     void Bind() const;
 };
