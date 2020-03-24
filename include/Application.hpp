@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include "Window.hpp"
+
 extern class Application* g_application;
 
 class Application
@@ -16,7 +18,9 @@ public:
     int Run();
 
 private:
-    std::vector<std::string> args;
+    // TODO: Rename to m_args
+    std::vector<std::string> args; 
+    Window m_window;
 
     int m_Init();
     int m_Main();
