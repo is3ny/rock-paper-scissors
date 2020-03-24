@@ -55,13 +55,14 @@ int Application::m_Main()
 {
     int frame = 1;
 
+    // Image img(0, 0, m_window.Width(), m_window.Height(), "test.png");
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        img.draw();
+        // img.draw();
 
         m_window.SwapBuffers();
     }
