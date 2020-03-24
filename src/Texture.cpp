@@ -2,12 +2,12 @@
 
 #include "Texture.hpp"
 
-Texture2D::Texture2D()
+Texture::Texture()
         : width_(0), height_(0), internal_format_(GL_RGB), image_format_(GL_RGB), wrap_s_(GL_REPEAT), wrap_t_(GL_REPEAT), filter_min_(GL_LINEAR_MIPMAP_LINEAR), filter_max_(GL_LINEAR) {
     glGenTextures(1, &this->id_);
 }
 
-void Texture2D::Generate(GLuint width, GLuint height, unsigned char * data) {
+void Texture::Generate(GLuint width, GLuint height, unsigned char * data) {
     this->width_ = width;
     this->height_ = height;
     // Create Texture
@@ -23,6 +23,6 @@ void Texture2D::Generate(GLuint width, GLuint height, unsigned char * data) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture2D::Bind() const {
+void Texture::Bind() const {
     glBindTexture(GL_TEXTURE_2D, this->id_);
 }
