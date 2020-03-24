@@ -1,6 +1,5 @@
-project(rps CXX)
+project(rps CXX C)
 cmake_minimum_required(VERSION 3.8)
-
 
 # The code snippet is taken from StackOverflow
 # Enables color output from ninja
@@ -13,9 +12,13 @@ if (${FORCE_COLORED_OUTPUT})
     endif ()
 endif ()
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/glfw)
 
 file(GLOB SRC ${CMAKE_SOURCE_DIR}/src/*)
 
 add_executable(${PROJECT_NAME} ${SRC})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_FLAGS -O2)
+target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/third_party/glfw/include/GLFW)
