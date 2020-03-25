@@ -1,8 +1,8 @@
-#include <iostream>
 #include <cassert>
 
 #include "glad/glad.h"
 #include "glfw3.h"
+#include "fmt/format.h"
 
 #include "Image.hpp"
 #include "ImageRenderer.hpp"
@@ -47,7 +47,7 @@ int Application::m_Init()
     try {
         m_window.Init(600, 600, "Hello!");
     } catch (const std::exception& e) {
-        std::cerr << "error: " << e.what() << '\n';
+        fmt::print(stderr, "error: {}\n", e.what());
         return 1;
     }
 

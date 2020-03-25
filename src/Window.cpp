@@ -1,5 +1,5 @@
 #include <stdexcept>
-#include <iostream>
+#include "fmt/format.h"
 
 #include "Window.hpp"
 
@@ -123,5 +123,5 @@ void Window::m_FrameBufferSizeCallback(GLFWwindow* window, int width, int height
 
 void Window::m_ErrorCallback(int code, const char* msg)
 {
-    std::cerr << "glfw error (" << code << "): " << msg << '\n';
+    fmt::print(stderr, "glfw error ({}): {}\n", code, msg);
 }

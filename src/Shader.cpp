@@ -1,5 +1,6 @@
+#include "fmt/format.h"
+
 #include "Shader.hpp"
-#include <iostream>
 
 Shader::Shader() {
 	this->id_ = -1;
@@ -135,17 +136,15 @@ void Shader::CheckCompileErrors(GLuint object, std::string type) {
         glGetProgramiv(object, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(object, 1024, NULL, log);
-            std::cout << "ERROR::SHADER: Link-time error. Type: " << type << "\n"
-                << log << "\n -- ------------------------------------------- --"
-                << std::endl;
+            fmt::print("ERROR::SHADER: Link-time error. Type: {}\n", type);
+            fmt::print("{}\n -- ------------------------------------------- --\n", log);
         }
     } else {
         glGetShaderiv(object, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(object, 1024, NULL, log);
-            std::cout << "ERROR::SHADER: Compile-time error. Type: " << type << "\n"
-                << log << "\n -- ------------------------------------------- --"
-                << std::endl;
+            fmt::print("ERROR::SHADER: Compile-time error. Type: {}\n", type);
+            fmt::print("{}\n -- ------------------------------------------- --\n", log);
         }
     }
 }
