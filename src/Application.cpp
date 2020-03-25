@@ -4,6 +4,9 @@
 #include "glad/glad.h"
 #include "glfw3.h"
 
+#include "Image.hpp"
+#include "ImageRenderer.hpp"
+
 #include "Application.hpp"
 
 
@@ -48,6 +51,7 @@ int Application::m_Init()
         return 1;
     }
 
+    ImageRenderer::Init();
     return 0;
 }
 
@@ -55,14 +59,14 @@ int Application::m_Main()
 {
     int frame = 1;
 
-    // Image img(0, 0, m_window.Width(), m_window.Height(), "test.png");
+    Image img({0, 0}, {100, 200}, "test.jpg");
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // img.draw();
+        img.Draw();
 
         m_window.SwapBuffers();
     }

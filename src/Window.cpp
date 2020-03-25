@@ -36,7 +36,7 @@ void Window::Init(int screenWidth, int screenHeight, const std::string& title)
 
     glfwMakeContextCurrent(m_window);
     
-    if (!gladLoadGL()))
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         throw std::runtime_error("Failed to initialize GLAD.");
 
     // Due to different DPI on different monitors, the actual _pixel_

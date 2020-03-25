@@ -19,12 +19,9 @@ public:
                           glm::vec2 pos = {0, 0}, 
                           glm::vec2 size = {32, 32}, 
                           float angle = 0.0f, 
-                          glm::vec3 color = {0, 0, 0});
+                          glm::vec3 color = {1, 1, 1});
 
 private:
     static GLuint m_quadVBO;
     static GLuint m_quadVAO;
 };
-
-GLuint ImageRenderer::m_quadVBO = 0;
-GLuint ImageRenderer::m_quadVAO = 0;

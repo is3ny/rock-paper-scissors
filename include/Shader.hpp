@@ -15,11 +15,13 @@ public:
 
 	void Compile(const GLchar *vert_src, const GLchar * frag_src, const GLchar * gmt_src);
 
+    // TODO: Unimplemented
     int LoadFromSource(const GLchar *vert_src, const GLchar *frag_src);
 	int LoadVertexFromSource(const GLchar *vert_src);
     int LoadFragmentFromSource(const GLchar *frag_src);
     int Link();
     int LinkComp(int n, const GLchar * vars[], GLenum mode);
+
     const Shader& Use() const;
     // Utility functions
     void SetFloat    (const GLchar *name, GLfloat value, GLboolean useShader = false) const;
