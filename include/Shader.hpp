@@ -24,16 +24,15 @@ public:
 
     const Shader& Use() const;
     // Utility functions
-    void SetFloat    (const GLchar *name, GLfloat value, GLboolean useShader = false) const;
-    void SetInteger  (const GLchar *name, GLint value, GLboolean useShader = false) const;
-    void SetVector2f (const GLchar *name, GLfloat x, GLfloat y, GLboolean useShader = false) const;
-    void SetVector2f (const GLchar *name, const glm::vec2 &value, GLboolean useShader = false) const;
-    void SetVector3f (const GLchar *name, GLfloat x, GLfloat y, GLfloat z, GLboolean useShader = false) const;
-    void SetVector3f (const GLchar *name, const glm::vec3 &value, GLboolean useShader = false) const;
-    void SetVector4f (const GLchar *name, GLfloat x, GLfloat y, GLfloat z, GLfloat w, GLboolean useShader = false) const;
-    void SetVector4f (const GLchar *name, const glm::vec4 &value, GLboolean useShader = false) const;
-    void SetMatrix4  (const GLchar *name, const glm::mat4 &matrix, GLboolean useShader = false) const;
-    void SetMatrix3  (const GLchar *name, const glm::mat3 &matrix, GLboolean useShader = false) const;
+    void SetUniform(const std::string& name, GLfloat value) const;
+    void SetUniform(const std::string& name, GLint value) const;
+    void SetUniform(const std::string& name, const glm::vec2& value) const;
+    void SetUniform(const std::string& name, const glm::vec3& value) const;
+    void SetUniform(const std::string& name, const glm::vec4& value) const;
+    void SetUniform(const std::string& name, const glm::mat4& value) const;
+    void SetUniform(const std::string& name, const glm::mat3& value) const;
 
 	void CheckCompileErrors(GLuint id, std::string type);
 };
+
+

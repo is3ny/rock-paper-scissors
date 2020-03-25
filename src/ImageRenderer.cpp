@@ -66,9 +66,9 @@ void ImageRenderer::DrawImage(const Shader& shader,
     model = glm::scale(model, glm::vec3(size, 1.0f));
     //Initialize shader
     shader.Use();
-    shader.SetMatrix4("model", model);
-    shader.SetMatrix4("projection", projection);
-    shader.SetVector3f("SpriteColor", color);
+    shader.SetUniform("model", model);
+    shader.SetUniform("projection", projection);
+    shader.SetUniform("SpriteColor", color);
     // Bind the proper texture
     glActiveTexture(GL_TEXTURE0);
     texture.Bind();
