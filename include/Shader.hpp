@@ -25,15 +25,19 @@ public:
 
     const Shader& Use() const;
     // Utility functions
-    void SetUniform(const std::string& name, GLfloat value) const;
-    void SetUniform(const std::string& name, GLint value) const;
-    void SetUniform(const std::string& name, const glm::vec2& value) const;
-    void SetUniform(const std::string& name, const glm::vec3& value) const;
-    void SetUniform(const std::string& name, const glm::vec4& value) const;
-    void SetUniform(const std::string& name, const glm::mat4& value) const;
-    void SetUniform(const std::string& name, const glm::mat3& value) const;
+    template<typename T>
+    void SetUniform(const std::string& name, const T& value) const;
 
 	void CheckCompileErrors(GLuint id, std::string type);
+
+private:
+    void setUniform(GLuint loc, GLfloat value) const;
+    void setUniform(GLuint loc, GLint value) const;
+    void setUniform(GLuint loc, const glm::vec2& value) const;
+    void setUniform(GLuint loc, const glm::vec3& value) const;
+    void setUniform(GLuint loc, const glm::vec4& value) const;
+    void setUniform(GLuint loc, const glm::mat4& value) const;
+    void setUniform(GLuint loc, const glm::mat3& value) const;
 };
 
 

@@ -74,40 +74,52 @@ const Shader& Shader::Use() const {
 	return *this;
 }
 
-void Shader::SetUniform(const std::string& name, GLfloat value) const
+template <typename T>
+void Shader::SetUniform(const std::string& name, const T& value) const
 {
-    glUniform1f(glGetUniformLocation(this->id_, name.data()), value);
+    GLuint location = glGetUniformLocation(this->id_, name.data());
+    if (location == -1)
+        fmt::print(stderr, "warning: Trying to assign a value to a uniform that doesn't exist: " + name + "\n");
+        return;
+
+    setUniform(location, value); 
 }
 
-void Shader::SetUniform(const std::string& name, GLint value) const
+void Shader::setUniform(GLuint loc, GLfloat value) const
 {
-    glUniform1i(glGetUniformLocation(this->id_, name.data()), value);
+    glUniform1f(loc, value);
 }
 
-void Shader::SetUniform(const std::string& name, const glm::vec2& value) const
+void Shader::setUniform(GLuint loc, GLint value) const
 {
-    glUniform2f(glGetUniformLocation(this->id_, name.data()), value.x, value.y);
+    glUniform1i(loc, value);
 }
 
-void Shader::SetUniform(const std::string& name, const glm::vec3& value) const
+void Shader::setUniform(GLuint loc, const glm::vec2& value) const
 {
-    glUniform3f(glGetUniformLocation(this->id_, name.data()), value.x, value.y, value.z);
+    glUniform2f(loc, value.x, value.y);
 }
 
-void Shader::SetUniform(const std::string& name, const glm::vec4& value) const
+void Shader::setUniform(GLuint loc, const glm::vec3& value) const
 {
-    glUniform4f(glGetUniformLocation(this->id_, name.data()), value.x, value.y, value.z, value.w);
+    glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void Shader::SetUniform(const std::string& name, const glm::mat4& value) const
+void Shader::setUniform(GLuint loc, const glm::vec4& value) const
 {
-    glUniformMatrix4fv(glGetUniformLocation(this->id_, name.data()), 1, GL_FALSE, glm::value_ptr(value));
+    glUniform4f(loc, value.x, value.y, value.z, value.w);
 }
 
-void Shader::SetUniform(const std::string& name, const glm::mat3& value) const
+void Shader::setUniform(GLuint loc, const glm::mat4& value) const
 {
-    glUniformMatrix3fv(glGetUniformLocation(this->id_, name.data()), 1, GL_FALSE, glm::value_ptr(value));
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
+
+void Shader::setUniform(GLuint loc, const glm::mat3& value) const
+{
+    glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(value));
+}
+
 
 void Shader::CheckCompileErrors(GLuint object, std::string type) {
     GLint success;
