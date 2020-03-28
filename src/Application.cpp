@@ -60,6 +60,7 @@ int Application::m_Init()
     }
 
     ResourceManager::Init(&m_window);
+    ResourceManager::LoadShader("image");
 
     ImageRenderer::Init();
     return 0;

@@ -13,9 +13,10 @@ public:
 	GLuint vert_, frag_;
 
 	Shader();
-    ~Shader();
+    // Destructor should not free the shader program
+    ~Shader() = default;
 
-	void Compile(const GLchar *vert_src, const GLchar * frag_src, const GLchar * gmt_src);
+    void Compile(const GLchar *vert_src, const GLchar * frag_src, const GLchar * gmt_src);
 
     // TODO: Unimplemented
     int LoadFromSource(const GLchar *vert_src, const GLchar *frag_src);
@@ -30,6 +31,7 @@ public:
     template<typename T>
     void SetUniform(const std::string& name, const T& value) const
     {
+        Use();
         GLint location = glGetUniformLocation(this->id_, name.data());
         if (location == -1) {
             fmt::print(stderr, "warning: Trying to assign a value to a uniform that doesn't exist: " + name + "\n");

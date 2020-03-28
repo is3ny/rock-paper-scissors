@@ -1,12 +1,14 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <map>
 
-#include "ObjectPool.hpp"
 #include "PixelData.hpp"
 #include "Shader.hpp"
 #include "Window.hpp"
+
+template<typename T, typename K>
+using ObjectPool = std::map<T, K>;
 
 class ResourceManager
 {
@@ -16,14 +18,14 @@ public:
     static void LoadShader(const std::string& name);
     static void LoadPixels(const std::string& name);
 
-    static void GetShader(const std::string& name);
-    static void GetPixels(const std::string& name);
+    static Shader& GetShader(const std::string& name);
+    static PixelData& GetPixels(const std::string& name);
 
     static void Clear();
 
 private:
-    static ObjectPool<Shader, std::string> m_shaderPool;
-    static ObjectPool<PixelData, std::string> m_pixelsPool;
+    static ObjectPool<std::string, Shader> m_shaderPool;
+    static ObjectPool<std::string, PixelData> m_pixelsPool;
 
     // TODO: Find out if this OK. May break if Window gets destroyed.
     static const Window* m_window;

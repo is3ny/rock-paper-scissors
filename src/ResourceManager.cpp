@@ -5,8 +5,8 @@
 
 #include "ResourceManager.hpp"
 
-ObjectPool<Shader, std::string> ResourceManager::m_shaderPool;
-ObjectPool<PixelData, std::string> ResourceManager::m_pixelsPool;
+ObjectPool<std::string, Shader> ResourceManager::m_shaderPool;
+ObjectPool<std::string, PixelData> ResourceManager::m_pixelsPool;
 
 const Window* ResourceManager::m_window;
 
@@ -42,7 +42,7 @@ void ResourceManager::LoadShader(const std::string& name)
     Shader shader;
     shader.Compile(vertSource.data(), fragSource.data(), geomSourceData);
 
-    m_shaderPool.Add(name, std::move(shader));
+    m_shaderPool[name] = shader;
 }
 
 
@@ -71,8 +71,24 @@ void ResourceManager::loadTextFromFile(const std::string& fileName, std::string&
     dest = ss.str();
 }
 
+Shader& ResourceManager::GetShader(const std::string& name)
+{
+ 
+    if (m_shaderPool.find(name) == m_shaderPool.end())
+        throw std::domain_error("Request for inexistent object");
+    return m_shaderPool[name];
+}
+
+PixelData& ResourceManager::GetPixels(const std::string& name)
+{
+    if (m_pixelsPool.find(name) == m_pixelsPool.end())
+        throw std::domain_error("Request for inexistent object");
+    return m_pixelsPool[name];
+}
+
 void ResourceManager::Clear()
 {
-    m_shaderPool.Clear();
-    m_pixelsPool.Clear();
+    for (auto& shader : m_shaderPool)
+        glDeleteShader(shader.second.id_);
+    //m_pixelsPool.Clear();
 }
