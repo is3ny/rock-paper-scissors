@@ -72,37 +72,37 @@ const Shader& Shader::Use() const {
 	return *this;
 }
 
-void Shader::setUniform(GLuint loc, GLfloat value) const
+void Shader::setUniform(GLint loc, GLfloat value) const
 {
     glUniform1f(loc, value);
 }
 
-void Shader::setUniform(GLuint loc, GLint value) const
+void Shader::setUniform(GLint loc, GLint value) const
 {
     glUniform1i(loc, value);
 }
 
-void Shader::setUniform(GLuint loc, const glm::vec2& value) const
+void Shader::setUniform(GLint loc, const glm::vec2& value) const
 {
     glUniform2f(loc, value.x, value.y);
 }
 
-void Shader::setUniform(GLuint loc, const glm::vec3& value) const
+void Shader::setUniform(GLint loc, const glm::vec3& value) const
 {
     glUniform3f(loc, value.x, value.y, value.z);
 }
 
-void Shader::setUniform(GLuint loc, const glm::vec4& value) const
+void Shader::setUniform(GLint loc, const glm::vec4& value) const
 {
     glUniform4f(loc, value.x, value.y, value.z, value.w);
 }
 
-void Shader::setUniform(GLuint loc, const glm::mat4& value) const
+void Shader::setUniform(GLint loc, const glm::mat4& value) const
 {
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::setUniform(GLuint loc, const glm::mat3& value) const
+void Shader::setUniform(GLint loc, const glm::mat3& value) const
 {
     glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
