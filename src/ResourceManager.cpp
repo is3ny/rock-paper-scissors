@@ -3,8 +3,6 @@
 
 #include "fmt/format.h"
 
-#include "PixelData.hpp"
-
 #include "ResourceManager.hpp"
 
 ObjectPool<Shader, std::string> ResourceManager::m_shaderPool;

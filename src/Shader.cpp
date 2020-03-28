@@ -1,5 +1,3 @@
-#include "fmt/format.h"
-
 #include "Shader.hpp"
 
 Shader::Shader() {
@@ -72,17 +70,6 @@ int Shader::LinkComp(int n, const GLchar * vars[], GLenum mode) {
 const Shader& Shader::Use() const {
     glUseProgram(this->id_);
 	return *this;
-}
-
-template <typename T>
-void Shader::SetUniform(const std::string& name, const T& value) const
-{
-    GLuint location = glGetUniformLocation(this->id_, name.data());
-    if (location == -1)
-        fmt::print(stderr, "warning: Trying to assign a value to a uniform that doesn't exist: " + name + "\n");
-        return;
-
-    setUniform(location, value); 
 }
 
 void Shader::setUniform(GLuint loc, GLfloat value) const
