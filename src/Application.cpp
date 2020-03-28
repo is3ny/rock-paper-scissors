@@ -6,6 +6,7 @@
 
 #include "Image.hpp"
 #include "ImageRenderer.hpp"
+#include "ResourceManager.hpp"
 
 #include "Application.hpp"
 
@@ -23,8 +24,15 @@ Application::Application()
 
 Application::~Application()
 {
+    m_CleanUp();
+
     assert(g_application == this);
     g_application = nullptr;
+}
+
+void Application::m_CleanUp()
+{
+    ResourceManager::Clear();
 }
 
 void Application::SetCommandArgs(int count, char* args[])
@@ -50,6 +58,8 @@ int Application::m_Init()
         fmt::print(stderr, "error: {}\n", e.what());
         return 1;
     }
+
+    ResourceManager::Init(&m_window);
 
     ImageRenderer::Init();
     return 0;

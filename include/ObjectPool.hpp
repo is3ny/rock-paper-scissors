@@ -33,6 +33,11 @@ public:
         m_pool.erase(id);
     }
 
+    void Clear() 
+    {
+        m_pool.clear();
+    }
+
 private:
     std::map<K, T> m_pool;
 };

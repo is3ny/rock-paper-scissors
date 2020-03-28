@@ -24,5 +24,6 @@ private:
 
     int m_Init();
     int m_Main();
+    void m_CleanUp();
 
 };

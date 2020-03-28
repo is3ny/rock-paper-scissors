@@ -70,3 +70,9 @@ void ResourceManager::loadTextFromFile(const std::string& fileName, std::string&
     file.close();
     dest = ss.str();
 }
+
+void ResourceManager::Clear()
+{
+    m_shaderPool.Clear();
+    m_pixelsPool.Clear();
+}

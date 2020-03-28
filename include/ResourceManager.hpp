@@ -19,6 +19,8 @@ public:
     static void GetShader(const std::string& name);
     static void GetPixels(const std::string& name);
 
+    static void Clear();
+
 private:
     static ObjectPool<Shader, std::string> m_shaderPool;
     static ObjectPool<PixelData, std::string> m_pixelsPool;
