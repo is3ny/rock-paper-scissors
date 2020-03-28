@@ -6,6 +6,12 @@ Shader::Shader() {
 	this->id_ = -1;
 }
 
+Shader::~Shader()
+{
+    if (this->id_ != -1)
+        glDeleteProgram(this->id_);
+}
+
 void Shader::Compile(const GLchar * vert_src, const GLchar * frag_src, const GLchar * gmt_src) {
     GLuint vert, frag, gmt;
     // Vertex shader

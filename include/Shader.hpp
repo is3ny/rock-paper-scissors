@@ -12,6 +12,7 @@ public:
 	GLuint vert_, frag_;
 
 	Shader();
+    ~Shader();
 
 	void Compile(const GLchar *vert_src, const GLchar * frag_src, const GLchar * gmt_src);
 
