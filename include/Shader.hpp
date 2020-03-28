@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "fmt/format.h"
 
 class Shader {
 public:
@@ -24,9 +25,18 @@ public:
     int LinkComp(int n, const GLchar * vars[], GLenum mode);
 
     const Shader& Use() const;
+
     // Utility functions
     template<typename T>
-    void SetUniform(const std::string& name, const T& value) const;
+    void SetUniform(const std::string& name, const T& value) const
+    {
+        GLuint location = glGetUniformLocation(this->id_, name.data());
+        if (location == -1)
+            fmt::print(stderr, "warning: Trying to assign a value to a uniform that doesn't exist: " + name + "\n");
+            return;
+    
+        setUniform(location, value); 
+    }
 
 	void CheckCompileErrors(GLuint id, std::string type);
 
