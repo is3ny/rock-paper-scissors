@@ -9,6 +9,7 @@
 #include "ImageRenderer.hpp"
 #include "ResourceManager.hpp"
 #include "Canvas.hpp"
+#include "stb_image.h"
 
 #include "Application.hpp"
 
@@ -54,6 +55,7 @@ int Application::Run()
 // TODO: Add an enumeration with success / failure, instead of 0 and 1.
 int Application::m_Init()
 {
+
     try {
         m_window.Init(600, 600, "Hello!");
     } catch (const std::exception& e) {
@@ -66,6 +68,7 @@ int Application::m_Init()
     ResourceManager::LoadShader("color_fill");
     ResourceManager::LoadShader("draw_pixel");
 
+    stbi_set_flip_vertically_on_load(true);
     ImageRenderer::Init();
     return 0;
 }
@@ -76,8 +79,8 @@ int Application::m_Main()
 
     
     Canvas canvas({m_window.Width(), m_window.Height()});
-    Image img({0, 0}, {600, 600}, canvas.GetTexture());
-    //Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
+    //Image img({0, 0}, {600, 600}, canvas.GetTexture());
+    Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 

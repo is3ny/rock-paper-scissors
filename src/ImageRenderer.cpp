@@ -51,7 +51,7 @@ void ImageRenderer::DrawImage(const Shader& shader,
     // The height is switched, so that we could have the vertically inverted
     // canonical coordinate system
     glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(vp[2]),
-                                      static_cast<GLfloat>(vp[3]), 0.0f,
+                                      0.0f, static_cast<GLfloat>(vp[3]),
                                       -1.0f, 1.0f);
     // Prepare transformations
     glm::mat4 model(1.0f);

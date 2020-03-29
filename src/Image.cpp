@@ -24,9 +24,10 @@ Image::Image(glm::vec2 pos, glm::vec2 size, const std::string& filepath)
 {
     Image();
 
+    int ch;  // Required to be passed, otherwise segfault (if vertical flip enabled)
     unsigned char* data = stbi_load(filepath.data(), 
                                     reinterpret_cast<int*>(&m_texture.width_), 
-                                    reinterpret_cast<int*>(&m_texture.height_), nullptr, 0);
+                                    reinterpret_cast<int*>(&m_texture.height_), &ch, 0);
     if (!data) 
         throw std::logic_error("No image data is found at " + filepath);
 
