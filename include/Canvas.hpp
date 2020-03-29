@@ -10,6 +10,7 @@ public:
     Canvas(glm::vec2 size);
 
     void SetPixel(glm::vec2 pos, glm::vec3 color);
+    void SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color);
     const Texture& GetTexture();
 
 private:

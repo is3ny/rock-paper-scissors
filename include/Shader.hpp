@@ -34,7 +34,7 @@ public:
         Use();
         GLint location = glGetUniformLocation(this->id_, name.data());
         if (location == -1) {
-            fmt::print(stderr, "warning: Trying to assign a value to a uniform that doesn't exist: " + name + "\n");
+            //fmt::print(stderr, "warning: Trying to assign a value to a uniform that doesn't exist: " + name + "\n");
             return;
         }
     

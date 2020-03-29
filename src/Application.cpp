@@ -3,13 +3,13 @@
 #include "glad/glad.h"
 #include "glfw3.h"
 #include "fmt/format.h"
+#include "fmt/printf.h"
 #include "stb_image.h"
 
 #include "Image.hpp"
 #include "ImageRenderer.hpp"
 #include "ResourceManager.hpp"
 #include "Canvas.hpp"
-#include "stb_image.h"
 
 #include "Application.hpp"
 
@@ -67,6 +67,7 @@ int Application::m_Init()
     ResourceManager::LoadShader("image");
     ResourceManager::LoadShader("color_fill");
     ResourceManager::LoadShader("draw_pixel");
+    ResourceManager::LoadShader("draw_line");
 
     stbi_set_flip_vertically_on_load(true);
     ImageRenderer::Init();
@@ -79,8 +80,11 @@ int Application::m_Main()
 
     
     Canvas canvas({m_window.Width(), m_window.Height()});
-    //Image img({0, 0}, {600, 600}, canvas.GetTexture());
-    Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
+    Image img({0, 0}, {600, 600}, canvas.GetTexture());
+    //Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
+
+    glm::vec2 prevPos = m_window.CursorPos();
+    double t = glfwGetTime();
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 
@@ -88,13 +92,23 @@ int Application::m_Main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::PRESS) {
+            prevPos = m_window.CursorPos();
+        } else if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
             auto mPos = m_window.CursorPos();
-            canvas.SetPixel(mPos, {1, 0, 0});
+            /*auto pixels = utils::PlotLine({prevPos.x, prevPos.y}, {mPos.x, mPos.y});
+            for (auto& i : pixels)
+                canvas.SetPixel(i, {0, 0, 0}); */
+            canvas.SetLine(prevPos, mPos, {0, 0, 0});
+            //canvas.SetPixel(mPos, {0, 0, 0});
             img.SetTexture(canvas.GetTexture());
+            prevPos = mPos;
         }
         img.Draw();
 
         m_window.SwapBuffers();
+        double nt = glfwGetTime();
+        fmt::printf("%f\n", nt - t);
+        t = nt;
     }
 
     return 0;
