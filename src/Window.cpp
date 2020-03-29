@@ -72,17 +72,17 @@ void Window::Close()
     return glfwSetWindowShouldClose(m_window, GLFW_TRUE);
 }
 
-std::string Window::Title()
+std::string Window::Title() const
 {
     return m_title;
 }
 
-int Window::Width()
+int Window::Width() const
 {
     return m_width;
 }
 
-int Window::Height()
+int Window::Height() const
 {
     return m_height;
 }
@@ -119,17 +119,17 @@ void Window::PollEvents()
     glfwPollEvents();
 }
 
-ButtonState Window::KeyPressed(int id)
+ButtonState Window::KeyPressed(int id) const
 {
     return m_keyPressed.at(id);
 }
 
-ButtonState Window::MouseButtonPressed(int id)
+ButtonState Window::MouseButtonPressed(int id) const
 {
     return m_mouseButtonStates.at(id);
 }
 
-glm::vec2 Window::CursorPos()
+glm::vec2 Window::CursorPos() const
 {
     return m_cursorPos;
 }

@@ -43,16 +43,6 @@ void ImageRenderer::DrawImage(const Shader& shader,
                               float angle,
                               glm::vec3 color)
 {
-    // TODO: Somehow we need to initialize the projection matrix with information from a window
-    // I.e., pixel width and height. Avoid asking OpenGL this information.
-    GLint vp[4];
-    glGetIntegerv(GL_VIEWPORT, vp);
-
-    // The height is switched, so that we could have the vertically inverted
-    // canonical coordinate system
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(vp[2]),
-                                      0.0f, static_cast<GLfloat>(vp[3]),
-                                      -1.0f, 1.0f);
     // Prepare transformations
     glm::mat4 model(1.0f);
     // Move to the desired position
@@ -67,7 +57,6 @@ void ImageRenderer::DrawImage(const Shader& shader,
     //Initialize shader
     shader.Use();
     shader.SetUniform("model", model);
-    shader.SetUniform("projection", projection);
     shader.SetUniform("SpriteColor", color);
     // Bind the proper texture
     glActiveTexture(GL_TEXTURE0);

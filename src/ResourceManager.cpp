@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "fmt/format.h"
+#include "glm/glm.hpp"
 
 #include "ResourceManager.hpp"
 
@@ -76,6 +77,19 @@ Shader& ResourceManager::GetShader(const std::string& name)
  
     if (m_shaderPool.find(name) == m_shaderPool.end())
         throw std::domain_error("Request for inexistent object");
+
+    auto shader = m_shaderPool[name];
+
+    // Set the global projection matrix if any
+    // TODO: It may be possible to limit the number of the projection matrix generation
+    //       Assign matrix at the loading and when the window is resized only...
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(m_window->Width()),
+                                      0.0f, static_cast<GLfloat>(m_window->Height()),
+                                      -1.0f, 1.0f);
+
+    shader.Use();
+    shader.SetUniform("projection", projection);
+    
     return m_shaderPool[name];
 }
 

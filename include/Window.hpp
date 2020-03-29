@@ -19,20 +19,20 @@ public:
     void Init(int screenWidth, int screenHeight, const std::string& title);
     int ShouldClose();
     void Close();
-    std::string Title();
+    std::string Title() const;
     /// In pixels
-    int Width();
+    int Width() const;
     /// In pixels
-    int Height();
+    int Height() const;
     void SetTitle(const std::string& newTitle);
     void SwapBuffers();
     void PollEvents();
 
     // Return the number of polls for which the key was pressed continuously
-    ButtonState KeyPressed(int id);
-    ButtonState MouseButtonPressed(int id);
+    ButtonState KeyPressed(int id) const;
+    ButtonState MouseButtonPressed(int id) const;
 
-    glm::vec2 CursorPos();
+    glm::vec2 CursorPos() const;
 
     void KeyCallback(int key, int scancode, int action, int mode);
     void FrameBufferSizeCallback(int width, int height);
