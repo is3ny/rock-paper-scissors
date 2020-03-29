@@ -11,6 +11,8 @@ class Image
 {
 public:
     Image();
+    // TODO: Maybe Texture should be const
+    Image(glm::vec2 pos, glm::vec2 size, Texture& texture);
     Image(glm::vec2 pos, glm::vec2 size, const std::string& filepath);
 
     glm::vec2 Pos()

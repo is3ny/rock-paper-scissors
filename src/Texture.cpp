@@ -3,10 +3,11 @@
 Texture::Texture()
         : width_(0), height_(0), internal_format_(GL_RGB), image_format_(GL_RGB), wrap_s_(GL_REPEAT), wrap_t_(GL_REPEAT), filter_min_(GL_LINEAR_MIPMAP_LINEAR), filter_max_(GL_LINEAR) 
 {
-    glGenTextures(1, &this->id_);
+    this->id_ = -1;
 }
 
 void Texture::Generate(unsigned char * data, GLuint width, GLuint height) {
+    glGenTextures(1, &this->id_);
     this->width_ = width ? width : width_;
     this->height_ = height ? height : height_;
     // Create Texture

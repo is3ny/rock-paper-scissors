@@ -16,9 +16,9 @@ public:
     GLuint wrap_t_;             // Wrapping on the T axis
     GLuint filter_min_;         // Filtering mode if texture pixels < screen pixels
     GLuint filter_max_;         // Filtering mode if texture pixels > screen pixels
-    // Constructor: sets default texture modes and generates an id
+    // Constructor: sets default texture modes
     Texture();
-    // Generates texture from image data with the above parameters
+    // Generates texture from image data with the above parameters and generates an id
     void Generate(unsigned char * data, GLuint width = 0, GLuint height = 0);
     // Binds the texture as the current GL_TEXTURE_2D texture object
     void Bind() const;

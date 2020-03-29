@@ -13,6 +13,12 @@ Image::Image()
         m_imageShader = ResourceManager::GetShader("image");
 }
 
+Image::Image(glm::vec2 pos, glm::vec2 size, Texture& texture)
+        : m_pos(pos), m_size(size), m_texture(texture)
+{
+    Image();
+}
+
 Image::Image(glm::vec2 pos, glm::vec2 size, const std::string& filepath)
         : m_pos(pos), m_size(size)
 {
