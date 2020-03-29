@@ -7,6 +7,7 @@
 #include "glm/glm.hpp"
 
 enum ButtonState {
+    // HOLD if the key was pressed for at least 2 polls
     RELEASE, PRESS, HOLD
 };
 

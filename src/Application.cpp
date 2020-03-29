@@ -8,6 +8,7 @@
 #include "Image.hpp"
 #include "ImageRenderer.hpp"
 #include "ResourceManager.hpp"
+#include "Canvas.hpp"
 
 #include "Application.hpp"
 
@@ -62,6 +63,8 @@ int Application::m_Init()
 
     ResourceManager::Init(&m_window);
     ResourceManager::LoadShader("image");
+    ResourceManager::LoadShader("color_fill");
+    ResourceManager::LoadShader("draw_pixel");
 
     ImageRenderer::Init();
     return 0;
@@ -72,23 +75,19 @@ int Application::m_Main()
     int frame = 1;
 
     
-    //Canvas canvas({m_window.Width(), m_window.Height()});
-    //Image img({0, 0}, {100, 200}, canvas.GetTexture());
-    Image img({0, 0}, {100, 200}, "test.jpg");
+    Canvas canvas({m_window.Width(), m_window.Height()});
+    Image img({0, 0}, {600, 600}, canvas.GetTexture());
+    //Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        /*if (m_window.MouseButtonPressed().lmb) {
+        if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::PRESS) {
             auto mPos = m_window.CursorPos();
-            canvas.setPixel(mPos / canvas.Size(), {1, 0, 0});
+            canvas.SetPixel(mPos, {1, 0, 0});
             img.SetTexture(canvas.GetTexture());
-        }*/
-        if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
-            auto cp = m_window.CursorPos();
-            fmt::print("Cursor pos: ({}, {})\n", cp.x, cp.y);
         }
         img.Draw();
 

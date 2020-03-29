@@ -12,7 +12,7 @@ class Image
 public:
     Image();
     // TODO: Maybe Texture should be const
-    Image(glm::vec2 pos, glm::vec2 size, Texture& texture);
+    Image(glm::vec2 pos, glm::vec2 size, const Texture& texture);
     Image(glm::vec2 pos, glm::vec2 size, const std::string& filepath);
 
     glm::vec2 Pos()
@@ -33,6 +33,16 @@ public:
     void SetSize(glm::vec2 size)
     {
         m_size = size;
+    }
+
+    const Texture& GetTexture()
+    {
+        return m_texture;
+    }
+
+    void SetTexture(const Texture& texture)
+    {
+        m_texture = texture;
     }
 
     void Draw();
