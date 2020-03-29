@@ -24,6 +24,8 @@ Window::~Window()
 void Window::Init(int screenWidth, int screenHeight, const std::string& title)
 {
     m_title = title;
+    m_keyPressed.resize(GLFW_KEY_LAST + 1, ButtonState::RELEASE);
+    m_mouseButtonStates.resize(GLFW_MOUSE_BUTTON_LAST + 1, ButtonState::RELEASE);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -50,6 +52,13 @@ void Window::Init(int screenWidth, int screenHeight, const std::string& title)
 
     glfwSetKeyCallback(m_window, m_KeyCallback);
     glfwSetFramebufferSizeCallback(m_window, m_FrameBufferSizeCallback);
+    glfwSetMouseButtonCallback(m_window, m_MouseButtonCallback);
+    glfwSetCursorPosCallback(m_window, m_CursorPosCallback);
+
+    double xPos, yPos;
+    glfwGetCursorPos(m_window, &xPos, &yPos);
+    m_cursorPos.x = xPos;
+    m_cursorPos.y = yPos;
 }
 
 int Window::ShouldClose()
@@ -90,15 +99,64 @@ void Window::SwapBuffers()
 
 void Window::PollEvents()
 {
+    // Replace any presses on holds before the poll
+    // If the button was released, then anyway it will be set to Release
+    // If the button was already pressed and nothing happened, it means the
+    // button is Held.
+    // The poll after this procedure will correctly mark new pressed key as
+    // Pressed.
+    if (m_checkKeyHold) {
+        checkHold(m_keyPressed);
+        m_checkKeyHold = false;
+    }
+
+    if (m_checkMouseButtonHold) {
+        checkHold(m_mouseButtonStates);
+        m_checkMouseButtonHold = false;
+    }
+
     glfwPollEvents();
 }
 
+ButtonState Window::KeyPressed(int id)
+{
+    return m_keyPressed.at(id);
+}
+
+ButtonState Window::MouseButtonPressed(int id)
+{
+    return m_mouseButtonStates.at(id);
+}
+
+glm::vec2 Window::CursorPos()
+{
+    return m_cursorPos;
+}
 
 void Window::KeyCallback(int key, int scancode, int action, int mode)
 {
-    if (key == GLFW_KEY_ESCAPE) {
-        Close();
+    if (action == GLFW_PRESS) {
+        m_keyPressed[key] = ButtonState::PRESS;
+        m_checkKeyHold = true;
+    } else if (action == GLFW_RELEASE) {
+        m_keyPressed[key] = ButtonState::RELEASE;
     }
+}
+
+void Window::MouseButtonCallback(int button, int action, int mods)
+{
+    if (action == GLFW_PRESS) {
+        m_mouseButtonStates[button] = ButtonState::PRESS;
+        m_checkMouseButtonHold = true;
+    } else if (action == GLFW_RELEASE) {
+        m_mouseButtonStates[button] = ButtonState::RELEASE;
+    }
+}
+
+void Window::CursorPosCallback(double xpos, double ypos)
+{
+    m_cursorPos.x = xpos;
+    m_cursorPos.y = ypos;
 }
 
 void Window::FrameBufferSizeCallback(int width, int height)
@@ -108,6 +166,14 @@ void Window::FrameBufferSizeCallback(int width, int height)
     glViewport(0, 0, m_width, m_height);
 }
 
+
+void Window::checkHold(std::vector<ButtonState>& states)
+{
+    for (auto& s : states) {
+        if (s == ButtonState::PRESS)
+            s = ButtonState::HOLD;
+    }
+}
 
 void Window::m_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -119,6 +185,18 @@ void Window::m_FrameBufferSizeCallback(GLFWwindow* window, int width, int height
 {
     Window* wrapper = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
     wrapper->FrameBufferSizeCallback(width, height);
+}
+
+void Window::m_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    Window* wrapper = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    wrapper->MouseButtonCallback(button, action, mods);
+}
+
+void Window::m_CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    Window* wrapper = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    wrapper->CursorPosCallback(xpos, ypos);
 }
 
 void Window::m_ErrorCallback(int code, const char* msg)

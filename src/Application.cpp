@@ -71,8 +71,10 @@ int Application::m_Main()
 {
     int frame = 1;
 
-    Image img({0, 0}, {100, 200}, "test.jpg");
+    
     //Canvas canvas({m_window.Width(), m_window.Height()});
+    //Image img({0, 0}, {100, 200}, canvas.GetTexture());
+    Image img({0, 0}, {100, 200}, "test.jpg");
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 
@@ -84,6 +86,10 @@ int Application::m_Main()
             canvas.setPixel(mPos / canvas.Size(), {1, 0, 0});
             img.SetTexture(canvas.GetTexture());
         }*/
+        if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
+            auto cp = m_window.CursorPos();
+            fmt::print("Cursor pos: ({}, {})\n", cp.x, cp.y);
+        }
         img.Draw();
 
         m_window.SwapBuffers();
