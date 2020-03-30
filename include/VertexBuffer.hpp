@@ -30,16 +30,15 @@ public:
 
     ~VertexBuffer()
     {
-        fmt::print("Died!\n");
         glDeleteBuffers(1, &m_vbo);
     }
 
-    GLuint Id()
+    GLuint Id() const
     {
         return m_vbo;
     }
 
-    void Bind()
+    void Bind() const
     {
         BindCustom(m_vbo);
     }

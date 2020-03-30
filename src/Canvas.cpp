@@ -47,24 +47,11 @@ Canvas::Canvas(glm::vec2 size)
         -1.0, -1.0,  0.0,  0.0
     };
 
-    //GLuint vbo;
-    //glGenBuffers(1, &vbo);
-/*  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-*/
     vbo.BufferData(quad, VertexBuffer::STATIC_DRAW);
-
-    //GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo.Id());
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    vao.SetAttribute(0, VertexArray::VEC4, vbo);
 
     fbo.Bind();
+    vao.Bind();
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -77,8 +64,8 @@ Canvas::Canvas(glm::vec2 size)
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    glBindVertexArray(0);
-
+    //glBindVertexArray(0);
+    VertexArray::BindDefault();
     Framebuffer::BindDefault();
 }
 
@@ -86,10 +73,10 @@ void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
 {
     pos += glm::vec2(0.5, 0.5);
     glm::vec2 ndcPos(pos.x / m_size.x, 1 - pos.y / m_size.y);
-    //fmt::print("{}, {}\n", ndcPos.x, ndcPos.y);
 
 
-    glBindVertexArray(vao);
+    //glBindVertexArray(vao);
+    vao.Bind();
     auto shader = ResourceManager::GetShader("draw_pixel");
     shader.Use();
     shader.SetUniform("pixelPos", ndcPos);
@@ -102,7 +89,8 @@ void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
     GetTexture().Bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
+    VertexArray::BindDefault();
 
     fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
     m_texSelected ^= 1;
@@ -121,58 +109,27 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
     start.y = - start.y;
     end.y =- end.y;
 
-    //fmt::print("From ({}, {}) to ({}, {})\n", start.x, start.y, end.x, end.y);
 
     std::vector<GLfloat> line = {
         start.x, start.y, 
         end.x, end.y
     };
-    //fmt::print("{}: {} {} {} {}\n", sizeof(line), line[0], line[1], line[2], line[3]);
 
     // Use VBO to store the coordinates of the line and the OpenGL facility to
     // draw really fast
-    /*
-    VertexBuffer vbo(line, GL_STREAM_DRAW);
-    VertexArray vao;
-    vao.SetAttribute(0, VAO::VEC2, vbo, 2, 0);
-
-    auto shader = ...
-    shader.Use();
-
-    fbo.Bind();
-    fbo.AttachTexture(Framebuffer::COLOR_ATTACHMENT, GetTexture());
-    glDrawArrays(GL_LINES, 0, 2);
-
-    fbo.Unbind();
-    */
     VertexBuffer lineVBO(line, VertexBuffer::STATIC_DRAW);
-    //VertexBuffer lineVBO;
-    //lineVBO.BufferData(line, VertexBuffer::STATIC_DRAW);
-    fmt::print("VBO = {}\n", lineVBO.Id());
-    /*
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
-    */
 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    lineVBO.Bind();
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
-    glEnableVertexAttribArray(0);
+    VertexArray vao;
+    vao.SetAttribute(0, VertexArray::VEC2, lineVBO);
 
     auto shader = ResourceManager::GetShader("draw_line");
-    shader.Use();
-    shader.SetUniform("desiredColor", color); 
+    shader.Use().SetUniform("desiredColor", color); 
 
     // Make framebuffer output to the currently available texture, and then
     // switch back
-    //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    //GetTexture().Bind();
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GetTexture().id_, 0);
     fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
     fbo.Bind();
+    vao.Bind();
 
     glDrawArrays(GL_LINES, 0, 2);
 
@@ -180,14 +137,9 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
     fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
     m_texSelected ^= 1;
 
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
     VertexBuffer::BindDefault();
-    glBindVertexArray(0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    VertexArray::BindDefault();
     Framebuffer::BindDefault();
-
-    //glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);
 }
 
 
