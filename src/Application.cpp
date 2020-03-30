@@ -98,7 +98,7 @@ int Application::m_Main()
             /*auto pixels = utils::PlotLine({prevPos.x, prevPos.y}, {mPos.x, mPos.y});
             for (auto& i : pixels)
                 canvas.SetPixel(i, {0, 0, 0}); */
-            canvas.SetLine(prevPos, mPos, {0, 0, 0});
+            canvas.SetLine(prevPos, mPos, {0, 1, 1});
             //canvas.SetPixel(mPos, {0, 0, 0});
             img.SetTexture(canvas.GetTexture());
             prevPos = mPos;
@@ -107,7 +107,7 @@ int Application::m_Main()
 
         m_window.SwapBuffers();
         double nt = glfwGetTime();
-        fmt::printf("%f\n", nt - t);
+        //fmt::printf("%f\n", nt - t);
         t = nt;
     }
 

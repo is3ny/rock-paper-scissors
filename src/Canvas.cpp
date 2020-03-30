@@ -12,16 +12,12 @@ Canvas::Canvas(glm::vec2 size)
 
     // Generate a texture filled with selected color
     // fully on GPU.
-    //GLuint fbo;
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     //GLuint tex;
     glGenTextures(1, &tex1);
     glGenTextures(1, &tex2);
     m_tex1.id_ = tex1;
     m_tex2.id_ = tex2;
-    fmt::print("Texture1 = {}\nTexture2 = {}\n", tex1, tex2);
     glBindTexture(GL_TEXTURE_2D, tex2);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_size.x, m_size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -36,21 +32,11 @@ Canvas::Canvas(glm::vec2 size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex1, 0);
+    fbo.AttachTexture(Framebuffer::COLOR, m_tex1);
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    if (!fbo.IsComplete())
         fmt::print(stderr, "The framebuffer is incomplete!\n");
 
-/*
-    GLfloat quad[] {
-    //  X     Y     S     T
-         1.0,  1.0,  1.0,  1.0,
-        -1.0, -1.0,  0.0,  0.0,
-        -1.0,  1.0,  0.0,  1.0,
-         1.0,  1.0,  1.0,  1.0,
-         1.0, -1.0,  1.0,  0.0,
-        -1.0, -1.0,  0.0,  0.0
-    };*/
     GLfloat quad[] {
     //  X     Y     S     T
          1.0,  1.0,  1.0,  1.0,
@@ -76,14 +62,14 @@ Canvas::Canvas(glm::vec2 size)
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    fbo.Bind();
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-//auto shader = ResourceManager::GetShader("color_fill");
-    //shader.Use();
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex2, 0);
+    fbo.AttachTexture(Framebuffer::COLOR, m_tex2);
 
     glClearColor(0, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -91,7 +77,7 @@ Canvas::Canvas(glm::vec2 size)
 
     glBindVertexArray(0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    Framebuffer::BindDefault();
 }
 
 void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
@@ -100,7 +86,6 @@ void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
     glm::vec2 ndcPos(pos.x / m_size.x, 1 - pos.y / m_size.y);
     //fmt::print("{}, {}\n", ndcPos.x, ndcPos.y);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     glBindVertexArray(vao);
     auto shader = ResourceManager::GetShader("draw_pixel");
@@ -108,6 +93,7 @@ void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
     shader.SetUniform("pixelPos", ndcPos);
     shader.SetUniform("desiredColor", color);
 
+    fbo.Bind();
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -116,11 +102,9 @@ void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
 
     glBindVertexArray(0);
 
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GetTexture().id_, 0);
-    //fmt::print("Now drawing to {}\n", GetTexture().id_);
+    fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
     m_texSelected ^= 1;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    Framebuffer::BindDefault();
 }
 
 void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
@@ -145,6 +129,20 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
 
     // Use VBO to store the coordinates of the line and the OpenGL facility to
     // draw really fast
+    /*
+    VertexBuffer vbo(line, GL_STREAM_DRAW);
+    VertexArray vao;
+    vao.SetAttribute(0, VAO::VEC2, vbo, 2, 0);
+
+    auto shader = ...
+    shader.Use();
+
+    fbo.Bind();
+    fbo.AttachTexture(Framebuffer::COLOR_ATTACHMENT, GetTexture());
+    glDrawArrays(GL_LINES, 0, 2);
+
+    fbo.Unbind();
+    */
     GLuint vbo, vao;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -161,20 +159,22 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
 
     // Make framebuffer output to the currently available texture, and then
     // switch back
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    GetTexture().Bind();
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GetTexture().id_, 0);
+    //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    //GetTexture().Bind();
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GetTexture().id_, 0);
+    fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
+    fbo.Bind();
 
     glDrawArrays(GL_LINES, 0, 2);
 
     m_texSelected ^= 1;
-    GetTexture().Bind();
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GetTexture().id_, 0);
+    fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
     m_texSelected ^= 1;
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    Framebuffer::BindDefault();
 
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);

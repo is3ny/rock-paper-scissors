@@ -2,6 +2,7 @@
 
 #include "glm/glm.hpp"
 #include "Texture.hpp"
+#include "Framebuffer.hpp"
 
 class Canvas
 {
@@ -17,7 +18,8 @@ private:
     glm::vec2 m_size;
     
     // TODO: Temporary
-    GLuint fbo, tex1, tex2, vbo, vao;
+    Framebuffer fbo;
+    GLuint tex1, tex2, vbo, vao;
 
     int m_texSelected = 0;
     Texture m_tex1, m_tex2;
