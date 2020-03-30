@@ -69,6 +69,7 @@ Canvas::Canvas(glm::vec2 size)
     Framebuffer::BindDefault();
 }
 
+/*
 void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
 {
     pos += glm::vec2(0.5, 0.5);
@@ -96,19 +97,16 @@ void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
     m_texSelected ^= 1;
     Framebuffer::BindDefault();
 }
+*/
 
 void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
 {
-    // OpenGL positions pixels according to their center
-    // TODO: Replace with projection matrix
     // We are working in NDC not in texture coordinates here...
+    // We'll convert from the UI coords to NDC: y-inversions welcome!
     // That's why we also don't need to 'shift-by-0.5' the coords.
-    start = glm::vec2(2) * (start / m_size) - glm::vec2(1);
-    end = glm::vec2(2) * (end / m_size) - glm::vec2(1);
-
-    start.y = - start.y;
-    end.y =- end.y;
-
+    glm::mat4 proj(1.0f);
+    proj = glm::translate(proj, {-1, 1, 0});
+    proj = glm::scale(proj, {2 / m_size.x, -2 / m_size.y, 0});
 
     std::vector<GLfloat> line = {
         start.x, start.y, 
@@ -123,7 +121,9 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
     vao.SetAttribute(0, VertexArray::VEC2, lineVBO);
 
     auto shader = ResourceManager::GetShader("draw_line");
-    shader.Use().SetUniform("desiredColor", color); 
+    shader.Use();
+    shader.SetUniform("desiredColor", color);
+    shader.SetUniform("proj", proj);
 
     // Make framebuffer output to the currently available texture, and then
     // switch back
