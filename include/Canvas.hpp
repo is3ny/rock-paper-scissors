@@ -24,7 +24,6 @@ private:
     Framebuffer fbo;
     VertexBuffer vbo;
     VertexArray vao;
-    GLuint tex1, tex2;
 
     int m_texSelected = 0;
     Texture m_tex1, m_tex2;

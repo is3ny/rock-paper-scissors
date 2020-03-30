@@ -53,8 +53,7 @@ public:
         GLint oldFBO = Current();
 
         Bind();
-        texture.Bind();
-        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.id_, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.ID(), 0);
 
         BindCustom(oldFBO);
     }

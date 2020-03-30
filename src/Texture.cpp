@@ -1,28 +1,49 @@
+#include <stdexcept>
+
 #include "Texture.hpp"
 
 Texture::Texture()
-        : width_(0), height_(0), internal_format_(GL_RGB), image_format_(GL_RGB), wrap_s_(GL_REPEAT), wrap_t_(GL_REPEAT), filter_min_(GL_LINEAR_MIPMAP_LINEAR), filter_max_(GL_LINEAR) 
+        : m_id(-1)
 {
-    this->id_ = -1;
 }
 
-void Texture::Generate(unsigned char * data, GLuint width, GLuint height) {
-    glGenTextures(1, &this->id_);
-    this->width_ = width ? width : width_;
-    this->height_ = height ? height : height_;
-    // Create Texture
-    glBindTexture(GL_TEXTURE_2D, this->id_);
-    glTexImage2D(GL_TEXTURE_2D, 0, this->internal_format_, width_, height_, 0, this->image_format_, GL_UNSIGNED_BYTE, data);
+void Texture::Generate(glm::uvec2 size, const void* data, TextureProperties props) 
+{
+    m_size = size;
+    m_props = props;
+
+    if (m_id == -1)
+        glGenTextures(1, &m_id);
+
+    glBindTexture(GL_TEXTURE_2D, m_id);
+    glTexImage2D(GL_TEXTURE_2D, 
+                 0,                         // Mipmap level: 0 = base image 
+                 m_props.internalFormat, 
+                 m_size.x, 
+                 m_size.y, 
+                 0,                         // Should be always zero
+                 m_props.imageFormat, 
+                 GL_UNSIGNED_BYTE, 
+                 data);
     glGenerateMipmap(GL_TEXTURE_2D);
-    // Set Texture wrap and filter modes
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, this->wrap_s_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, this->wrap_t_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->filter_min_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, this->filter_max_);
-    // Unbind texture
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_props.sWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_props.tWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_props.minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_props.magFilter);
+
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Texture::Bind() const {
-    glBindTexture(GL_TEXTURE_2D, this->id_);
+    if (m_id == -1)
+        throw std::runtime_error("Trying to bind uninitialized texture");
+
+    BindCustom(m_id);
+}
+
+
+void Texture::BindCustom(GLuint name)
+{
+    glBindTexture(GL_TEXTURE_2D, name);
 }
