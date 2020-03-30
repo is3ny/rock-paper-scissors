@@ -37,8 +37,8 @@ Canvas::Canvas(glm::vec2 size)
     if (!fbo.IsComplete())
         fmt::print(stderr, "The framebuffer is incomplete!\n");
 
-    GLfloat quad[] {
-    //  X     Y     S     T
+    std::vector<GLfloat> quad = {
+     //  X     Y     S     T
          1.0,  1.0,  1.0,  1.0,
         -1.0, -1.0,  0.0,  0.0,
         -1.0,  1.0,  0.0,  1.0,
@@ -48,16 +48,18 @@ Canvas::Canvas(glm::vec2 size)
     };
 
     //GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    //glGenBuffers(1, &vbo);
+/*  glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+*/
+    vbo.BufferData(quad, VertexBuffer::STATIC_DRAW);
 
     //GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo.Id());
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -121,7 +123,7 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
 
     //fmt::print("From ({}, {}) to ({}, {})\n", start.x, start.y, end.x, end.y);
 
-    GLfloat line[] = {
+    std::vector<GLfloat> line = {
         start.x, start.y, 
         end.x, end.y
     };
@@ -143,13 +145,20 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
 
     fbo.Unbind();
     */
-    GLuint vbo, vao;
+    VertexBuffer lineVBO(line, VertexBuffer::STATIC_DRAW);
+    //VertexBuffer lineVBO;
+    //lineVBO.BufferData(line, VertexBuffer::STATIC_DRAW);
+    fmt::print("VBO = {}\n", lineVBO.Id());
+    /*
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(line), line, GL_STATIC_DRAW);
+    */
 
+    GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
+    lineVBO.Bind();
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -171,12 +180,13 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
     fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
     m_texSelected ^= 1;
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    VertexBuffer::BindDefault();
     glBindVertexArray(0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
     Framebuffer::BindDefault();
 
-    glDeleteBuffers(1, &vbo);
+    //glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
 }
 

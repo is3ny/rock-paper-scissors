@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "Texture.hpp"
 #include "Framebuffer.hpp"
+#include "VertexBuffer.hpp"
 
 class Canvas
 {
@@ -19,7 +20,8 @@ private:
     
     // TODO: Temporary
     Framebuffer fbo;
-    GLuint tex1, tex2, vbo, vao;
+    VertexBuffer vbo;
+    GLuint tex1, tex2, vao;
 
     int m_texSelected = 0;
     Texture m_tex1, m_tex2;
