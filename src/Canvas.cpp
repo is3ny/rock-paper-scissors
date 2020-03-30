@@ -20,7 +20,7 @@ Canvas::Canvas(glm::vec2 size)
     m_tex1.Generate(m_size, nullptr, texConf);
     m_tex2.Generate(m_size, nullptr, texConf);
 
-    if (!fbo.IsComplete())
+    if (!m_fbo.IsComplete())
         fmt::print(stderr, "The framebuffer is incomplete!\n");
 
     std::vector<GLfloat> quad = {
@@ -33,20 +33,20 @@ Canvas::Canvas(glm::vec2 size)
         -1.0, -1.0,  0.0,  0.0
     };
 
-    vbo.BufferData(quad, VertexBuffer::STATIC_DRAW);
-    vao.SetAttribute(0, VertexArray::VEC4, vbo);
+    m_vbo.BufferData(quad, VertexBuffer::STATIC_DRAW);
+    m_vao.SetAttribute(0, VertexArray::VEC4, m_vbo);
 
-    fbo.Bind();
-    vao.Bind();
+    m_fbo.Bind();
+    m_vao.Bind();
 
     // This will basically fill the texture with the clear color
     // But the drawArrays call is still needed
-    fbo.AttachTexture(Framebuffer::COLOR, m_tex1);
+    m_fbo.AttachTexture(Framebuffer::COLOR, m_tex1);
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    fbo.AttachTexture(Framebuffer::COLOR, m_tex2);
+    m_fbo.AttachTexture(Framebuffer::COLOR, m_tex2);
     glClearColor(0, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -83,14 +83,14 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color)
 
     // Make framebuffer output to the currently available texture, and then
     // switch back
-    fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
-    fbo.Bind();
+    m_fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
+    m_fbo.Bind();
     vao.Bind();
 
     glDrawArrays(GL_LINES, 0, 2);
 
     m_texSelected ^= 1;
-    fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
+    m_fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
     m_texSelected ^= 1;
 
     VertexBuffer::BindDefault();

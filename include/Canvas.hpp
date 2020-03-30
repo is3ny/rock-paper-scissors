@@ -21,9 +21,9 @@ public:
 private:
     glm::vec2 m_size;
     
-    Framebuffer fbo;
-    VertexBuffer vbo;
-    VertexArray vao;
+    Framebuffer m_fbo;
+    VertexBuffer m_vbo;
+    VertexArray m_vao;
 
     int m_texSelected = 0;
     Texture m_tex1, m_tex2;
