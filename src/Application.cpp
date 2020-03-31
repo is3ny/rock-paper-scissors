@@ -81,7 +81,7 @@ int Application::m_Main()
 
     
     Canvas canvas({m_window.Width(), m_window.Height()});
-    Image img({0, 0}, {500, 500}, canvas.GetTexture());
+    Image img({0, 0}, {500, 600}, canvas.GetTexture());
     //Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
 
     glm::vec2 prevPos = m_window.CursorPos();
@@ -135,6 +135,7 @@ int Application::m_Main()
         if (m_window.KeyPressed(GLFW_KEY_W))
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        img.SetSize(m_window.Size());
         img.Draw();
 
         m_window.SwapBuffers();

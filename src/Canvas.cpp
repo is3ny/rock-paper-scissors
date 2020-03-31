@@ -63,8 +63,7 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 
         inputSize = m_size;
 
     glm::mat4 proj(1.0f);
-    proj = glm::translate(proj, {-1, 1, 0});
-    proj = glm::scale(proj, {2 / inputSize.x, -2 / inputSize.y, 0});
+    proj = glm::ortho(0.0f, inputSize.x, inputSize.y, 0.0f, -1.0f, 1.0f);
 
     std::vector<GLfloat> line = {
         start.x, start.y, 
