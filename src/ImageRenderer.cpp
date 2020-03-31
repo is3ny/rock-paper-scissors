@@ -8,13 +8,13 @@ void ImageRenderer::Init()
     // Vertex data, the first vertex is at the top-left corner
     GLfloat data[] {
     //  X     Y     S     T
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 1.0f, 1.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
 
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f
+        0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 1.0f, 0.0f,
+        1.0f, 0.0f, 1.0f, 1.0f
     };
 
     // Initialize and update quad buffer

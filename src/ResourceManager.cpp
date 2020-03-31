@@ -84,7 +84,7 @@ Shader& ResourceManager::GetShader(const std::string& name)
     // TODO: It may be possible to limit the number of the projection matrix generation
     //       Assign matrix at the loading and when the window is resized only...
     glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(m_window->Width()),
-                                      0.0f, static_cast<GLfloat>(m_window->Height()),
+                                      static_cast<GLfloat>(m_window->Height()), 0.0f,
                                       -1.0f, 1.0f);
 
     shader.Use();
