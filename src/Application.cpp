@@ -81,7 +81,7 @@ int Application::m_Main()
 
     
     Canvas canvas({m_window.Width(), m_window.Height()});
-    Image img({0, 0}, {600, 600}, canvas.GetTexture());
+    Image img({0, 0}, {500, 500}, canvas.GetTexture());
     //Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
 
     glm::vec2 prevPos = m_window.CursorPos();
@@ -98,25 +98,38 @@ int Application::m_Main()
             prevPos = m_window.CursorPos();
         } else if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
             auto mPos = m_window.CursorPos();
-            canvas.SetLine(prevPos, mPos, {0, 1, 1}, img.Size());
+            canvas.SetLine(prevPos, mPos, {0, 1, 1}); 
             img.SetTexture(canvas.GetTexture());
             prevPos = mPos;
         }
 
-        if (m_window.KeyPressed(GLFW_KEY_X) == ButtonState::HOLD) {
+        if (m_window.KeyPressed(GLFW_KEY_LEFT) == ButtonState::HOLD) {
             canvas.Resize({prevSize.x + 1, prevSize.y});
             img.SetTexture(canvas.GetTexture());
             prevSize = canvas.Size();
             fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
         }
 
-        if (m_window.KeyPressed(GLFW_KEY_Z) == ButtonState::PRESS) {
+        if (m_window.KeyPressed(GLFW_KEY_RIGHT) == ButtonState::HOLD) {
             canvas.Resize({prevSize.x - 1, prevSize.y});
             img.SetTexture(canvas.GetTexture());
             prevSize = canvas.Size();
             fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
         }
 
+        if (m_window.KeyPressed(GLFW_KEY_DOWN) == ButtonState::HOLD) {
+            canvas.Resize({prevSize.x, prevSize.y - 1});
+            img.SetTexture(canvas.GetTexture());
+            prevSize = canvas.Size();
+            fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
+        }
+
+        if (m_window.KeyPressed(GLFW_KEY_UP) == ButtonState::HOLD) {
+            canvas.Resize({prevSize.x, prevSize.y + 1});
+            img.SetTexture(canvas.GetTexture());
+            prevSize = canvas.Size();
+            fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
+        }
         if (m_window.KeyPressed(GLFW_KEY_Q))
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         if (m_window.KeyPressed(GLFW_KEY_W))

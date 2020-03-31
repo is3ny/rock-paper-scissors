@@ -16,8 +16,8 @@ Canvas::Canvas(glm::vec2 size)
     texConf.internalFormat = texConf.imageFormat = GL_RGB;
 
     // By passing nullptr we are telling GPU to just allocate the memory
-    m_tex1.Generate(m_size, nullptr, texConf);
-    m_tex2.Generate(m_size, nullptr, texConf);
+    m_texBuf[0].Generate(m_size, nullptr, texConf);
+    m_texBuf[1].Generate(m_size, nullptr, texConf);
 
     std::vector<GLfloat> quad = {
      //  X     Y     S     T
@@ -33,23 +33,25 @@ Canvas::Canvas(glm::vec2 size)
     m_vbo.BufferData(quad, VertexBuffer::STATIC_DRAW);
     m_vao.SetAttribute(0, VertexArray::VEC4, m_vbo);
 
-    m_fbo.Bind();
+    Framebuffer fbo;
+    fbo.Bind();
+
     m_vao.Bind();
 
     // This will basically fill the texture with the clear color
     // But the drawArrays call is still needed
-    m_fbo.AttachTexture(Framebuffer::COLOR, m_tex1);
+    fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[0]);
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    m_fbo.AttachTexture(Framebuffer::COLOR, m_tex2);
+    fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
     glClearColor(0, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     VertexArray::BindDefault();
-    Framebuffer::BindDefault();
+    fbo.Unbind();
 }
 
 void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 inputSize)
@@ -83,23 +85,23 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 
 
     // Make framebuffer output to the currently available texture, and then
     // switch back
-    m_fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
-    m_fbo.Bind();
+    Framebuffer fbo({600, 600});
+    fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[0]);
+    fbo.Bind();
     vao.Bind();
 
     glDrawArrays(GL_LINES, 0, 2);
 
-    m_texSelected ^= 1;
-    m_fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
-    m_texSelected ^= 1;
+    fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
+    fbo.Unbind();
 
     VertexBuffer::BindDefault();
     VertexArray::BindDefault();
-    Framebuffer::BindDefault();
 }
 
 void Canvas::Resize(glm::vec2 newSize)
 {
+
     // 1. Clear texture and allocate for new dimension
     // 2. Prepare projection matrix
     // 3. Bind FBO, VAO and render
@@ -107,39 +109,42 @@ void Canvas::Resize(glm::vec2 newSize)
 
     // TODO: TextureProperties probably have to be exported to the private
     // class member.
-    m_texSelected ^= 1;
-    getTexture().Generate(newSize, nullptr, TextureProperties());
-    Framebuffer fbo;
-    fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
-    m_texSelected ^= 1;
+    m_texBuf[1].Generate(newSize, nullptr, TextureProperties());
 
-    glm::mat4 texProj(1.0);
-    texProj = glm::translate(texProj, {0, 0, 0});
-    texProj = glm::scale(texProj, { 1 / m_size.x, 1 / m_size.y, 0 });
+    Framebuffer fbo(newSize);
+    fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
+
+    if (!fbo.IsComplete())
+        fmt::print("Aha!\n");
+
+    glm::mat4 proj(1.0);
+    proj = glm::translate(proj, {-1, 1, 0});
+    proj = glm::scale(proj, {2 * m_size.x / newSize.x, 2 * m_size.y / newSize.y, 0});
+
+    // (0, 0) -- (1, -1)
+    std::vector<GLfloat> quad = {
+     //  X     Y     S     T
+         0.0,  0.0,
+         1.0,  0.0,
+         0.0, -1.0,
+         1.0,  0.0,
+         0.0, -1.0,
+         1.0, -1.0
+    };
 
     std::vector<GLfloat> texCoords = {
-        newSize.x, newSize.y,
-        0,        0,
-        0,        newSize.y,
-        newSize.x, newSize.y,
-        newSize.x, 0,
-        0,        0
+        0.0, 1.0,
+        1.0, 1.0,
+        0.0, 0.0,
+        1.0, 1.0,
+        0.0, 0.0, 
+        1.0, 0.0
     };
 
     glm::vec2 s, e;
-    s = texProj * glm::vec4(0, 0, 0, 1);
-    e = texProj * glm::vec4(newSize.x, newSize.y, 0, 1);
-    fmt::print("Tex rect: ({}, {}) -- ({}, {})\n", s.x, s.y, e.x, e.y);
-
-    std::vector<GLfloat> quad = {
-     //  X     Y     S     T
-         1.0,  1.0,
-        -1.0, -1.0,
-        -1.0,  1.0,
-         1.0,  1.0,
-         1.0, -1.0,
-        -1.0, -1.0
-    };
+    s = proj * glm::vec4(0, 0, 0, 1);
+    e = proj * glm::vec4(1, -1, 0, 1);
+    fmt::print("\nTex rect: ({}, {}) -- ({}, {})\n", s.x, s.y, e.x, e.y);
 
     VertexBuffer quadVBO(quad, VertexBuffer::STREAM_DRAW);
     VertexBuffer texCoordVBO(texCoords, VertexBuffer::STREAM_DRAW);
@@ -150,41 +155,39 @@ void Canvas::Resize(glm::vec2 newSize)
 
     auto shader = ResourceManager::GetShader("resize_canvas");
     shader.Use();
-    shader.SetUniform("texProj", texProj);
-    shader.SetUniform("borderColor", glm::vec3(1, 0, 0));
+    shader.SetUniform("proj", proj);
     
     fbo.Bind();
     vao.Bind();
     GetTexture().Bind();
 
-    glClearColor(1, 1, 0, 1);
+    glClearColor(1, 0, 1, 1); // Border color
     glClear(GL_COLOR_BUFFER_BIT);
 
     // TODO: Replace with Triangle fan
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     VertexArray::BindDefault();
+    fbo.Unbind();
 
-    getTexture().Generate(newSize, nullptr, TextureProperties());
-    m_fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
-    m_texSelected ^= 1;
-    Framebuffer::BindDefault();
+    //fmt::print("Old = {} {}", m_texBuf[0].ID());
+    std::swap(m_texBuf[0], m_texBuf[1]);
+    fmt::print("New = {} {}\n", m_texBuf[0].ID(), m_texBuf[1].ID());
+
+    // The texture to be rendered next also has to have new dimensions
+    m_texBuf[1].Generate(newSize, nullptr, TextureProperties());
 
     m_size = newSize;
 }
 
 const Texture& Canvas::GetTexture() const
 {
-    if (m_texSelected == 0)
-        return m_tex1;
-    return m_tex2;
+    return m_texBuf[0];
 }
 
 Texture& Canvas::getTexture()
 {
-    if (m_texSelected == 0)
-        return m_tex1;
-    return m_tex2;
+    return m_texBuf[0];
 }
 
 

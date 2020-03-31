@@ -12,9 +12,8 @@ void Texture::Generate(glm::uvec2 size, const void* data, TextureProperties prop
     m_size = size;
     m_props = props;
 
-    if (m_id != -1)
-        glDeleteTextures(1, &m_id);
-    glGenTextures(1, &m_id);
+    if (m_id == -1)
+        glGenTextures(1, &m_id);
     
 
     glBindTexture(GL_TEXTURE_2D, m_id);

@@ -5,11 +5,16 @@
 
 #include "Texture.hpp"
 
+namespace utils
+{
+    void SetGlobalViewport(const glm::ivec4&);
+} // namespace utils
+
 class Framebuffer
 {
 public:
     enum AttachmentType {
-        COLOR = GL_COLOR_ATTACHMENT0,    // Access i-th by addith i to this const
+        COLOR = GL_COLOR_ATTACHMENT0,    // Access i-th attachment by adding i to this constant
         DEPTH = GL_DEPTH_ATTACHMENT,
         STENCIL = GL_STENCIL_ATTACHMENT,
         DEPTH_STENCIL = GL_DEPTH_STENCIL_ATTACHMENT
@@ -20,42 +25,67 @@ public:
         glGenFramebuffers(1, &m_fbo);
     }
 
-    explicit Framebuffer(int fbo)
-            : m_fbo(fbo), foreign(true)
+    Framebuffer(const glm::ivec4& vp)
+            : m_viewport(vp)
     {
+        glGenFramebuffers(1, &m_fbo);
     }
 
-    // Is this good practice? What about the rule of 5?
-    Framebuffer(Framebuffer&& other)
-            : m_fbo(other.m_fbo), foreign(other.foreign)
+    Framebuffer(const glm::ivec2& vp)
+    {
+        m_viewport = glm::ivec4(0, 0, vp.x, vp.y);
+        glGenFramebuffers(1, &m_fbo);
+    }
+
+    explicit Framebuffer(int fbo)
+            : m_fbo(fbo), m_foreign(true)
     {
     }
 
     ~Framebuffer()
     {
-        if (!foreign)
+        if (!m_foreign)
             glDeleteFramebuffers(1, &m_fbo);
     }
 
-    GLint Id()
+    GLuint ID() const
     {
         return m_fbo;
     }
 
-    void Bind() const
+    void SetViewport(glm::ivec4 viewport)
     {
-        BindCustom(m_fbo);
+        m_viewport = viewport;
+    }
+
+    glm::ivec4 GetViewport() const
+    {
+        return m_viewport;
+    }
+
+    void Bind()
+    {
+        auto cur = Current();
+        m_prevFBO = cur.ID();
+        m_prevViewport = cur.GetViewport();
+
+        utils::SetGlobalViewport(m_viewport);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+        m_current = m_fbo;
+    }
+
+    void Unbind()
+    {
+        utils::SetGlobalViewport(m_prevViewport);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_prevFBO);
+        m_current = m_prevFBO;
     }
 
     void AttachTexture(AttachmentType attachment, const Texture& texture)
     {
-        // Remember the framebuffer that was previously attached to return it back
-        GLint oldFBO = Current();
-
         Bind();
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture.ID(), 0);
-
-        BindCustom(oldFBO);
+        Unbind();
     }
 
     bool IsComplete() const
@@ -63,25 +93,24 @@ public:
         return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
     }
 
-    static void BindCustom(GLint fbo)
+    static Framebuffer Current()
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        m_current = fbo;
-    }
+        Framebuffer cur(m_current);
 
-    static void BindDefault()
-    {
-        BindCustom(0);
-    }
+        GLint vp[4];
+        glGetIntegerv(GL_VIEWPORT, vp);
+        cur.m_viewport = {vp[0], vp[1], vp[2], vp[3]};
 
-    static GLint Current()
-    {
-        return m_current;
+        return cur;
     }
 
 private:
     GLuint m_fbo;
-    bool foreign = false;
+    bool m_foreign = false;
+    glm::ivec4 m_viewport;
+
+    GLuint m_prevFBO;
+    glm::ivec4 m_prevViewport;
 
     // The expected way to acquire the name of the currently bound fbo is to
     // call glGetIntegerv(GL_FRAMEBUFFER_BINDING, ...), but it always returns zero

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "glm/glm.hpp"
 #include "Texture.hpp"
 #include "Framebuffer.hpp"
@@ -24,12 +26,10 @@ public:
 private:
     glm::vec2 m_size;
     
-    Framebuffer m_fbo;
     VertexBuffer m_vbo;
     VertexArray m_vao;
 
-    int m_texSelected = 0;
-    Texture m_tex1, m_tex2;
+    std::vector<Texture> m_texBuf{2};
 
     // HACK: some functions need a non-const texture
     Texture& getTexture();
