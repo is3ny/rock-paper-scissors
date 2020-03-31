@@ -51,7 +51,5 @@ private:
     glm::vec2 m_pos;
     glm::vec2 m_size;
     Texture m_texture;
-
-    static Shader m_imageShader;
 };
 

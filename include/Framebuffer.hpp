@@ -69,15 +69,15 @@ public:
         m_prevFBO = cur.ID();
         m_prevViewport = cur.GetViewport();
 
-        utils::SetGlobalViewport(m_viewport);
         glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+        utils::SetGlobalViewport(m_viewport);
         m_current = m_fbo;
     }
 
     void Unbind()
     {
-        utils::SetGlobalViewport(m_prevViewport);
         glBindFramebuffer(GL_FRAMEBUFFER, m_prevFBO);
+        utils::SetGlobalViewport(m_prevViewport);
         m_current = m_prevFBO;
     }
 

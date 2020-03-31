@@ -85,15 +85,13 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 
 
     // Make framebuffer output to the currently available texture, and then
     // switch back
-    // TODO: WTF
-    Framebuffer fbo({600, 600});
+    Framebuffer fbo(m_size);
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[0]);
     fbo.Bind();
     vao.Bind();
 
     glDrawArrays(GL_LINES, 0, 2);
 
-    fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
     fbo.Unbind();
 
     VertexBuffer::BindDefault();

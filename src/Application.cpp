@@ -91,14 +91,14 @@ int Application::m_Main()
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 
-        glClearColor(1, 1, 1, 1);
+        glClearColor(0, 0, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
         if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::PRESS) {
             prevPos = m_window.CursorPos();
         } else if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
             auto mPos = m_window.CursorPos();
-            canvas.SetLine(prevPos, mPos, {0, 1, 1}); 
+            canvas.SetLine(prevPos, mPos, {0, 1, 1}, m_window.Size()); 
             img.SetTexture(canvas.GetTexture());
             prevPos = mPos;
         }

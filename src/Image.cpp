@@ -5,25 +5,18 @@
 
 #include "Image.hpp"
 
-Shader Image::m_imageShader;
-
 Image::Image()
 {
-    if (m_imageShader.id_ == -1)
-        m_imageShader = ResourceManager::GetShader("image");
 }
 
 Image::Image(glm::vec2 pos, glm::vec2 size, const Texture& texture)
         : m_pos(pos), m_size(size), m_texture(texture)
 {
-    Image();
 }
 
 Image::Image(glm::vec2 pos, glm::vec2 size, const std::string& filepath)
         : m_pos(pos), m_size(size)
 {
-    Image();
-
     int ch;  // Required to be passed, otherwise segfault (if vertical flip enabled)
     glm::ivec2 imageSize;
     unsigned char* data = stbi_load(filepath.data(), 
@@ -46,5 +39,7 @@ Image::Image(glm::vec2 pos, glm::vec2 size, const std::string& filepath)
 
 void Image::Draw()
 {
-    ImageRenderer::DrawImage(m_imageShader, m_texture, m_pos, m_size);
+    // The direct call to ResourceManager here is needed, because then the projection
+    // matrix can be updated. TODO: Find a better way.
+    ImageRenderer::DrawImage(ResourceManager::GetShader("image"), m_texture, m_pos, m_size);
 }

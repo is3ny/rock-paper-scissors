@@ -24,6 +24,7 @@ public:
     int Width() const;
     /// In pixels
     int Height() const;
+    glm::ivec2 Size() const;
     void SetTitle(const std::string& newTitle);
     void SwapBuffers();
     void PollEvents();
@@ -40,6 +41,7 @@ public:
     void CursorPosCallback(double xpos, double ypos);
 
 private:
+    // TODO: Consider making an ivec here
     int m_width = 0, m_height = 0;
     std::string m_title;
 

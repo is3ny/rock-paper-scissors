@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include "fmt/format.h"
+#include "Framebuffer.hpp"
 
 #include "Window.hpp"
 
@@ -29,7 +30,7 @@ void Window::Init(int screenWidth, int screenHeight, const std::string& title)
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    //glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);  // Multisampling for smooth resize
 
@@ -85,6 +86,11 @@ int Window::Width() const
 int Window::Height() const
 {
     return m_height;
+}
+
+glm::ivec2 Window::Size() const
+{
+    return {m_width, m_height};
 }
 
 void Window::SetTitle(const std::string& newTitle)
@@ -164,7 +170,10 @@ void Window::FrameBufferSizeCallback(int width, int height)
 {
     m_width = width;
     m_height = height;
-    glViewport(0, 0, m_width, m_height);
+
+    Framebuffer fbo(0);
+    fbo.SetViewport({0, 0, width, height});
+    fbo.Bind();
 }
 
 
