@@ -68,6 +68,7 @@ int Application::m_Init()
     ResourceManager::LoadShader("color_fill");
     ResourceManager::LoadShader("draw_pixel");
     ResourceManager::LoadShader("draw_line");
+    ResourceManager::LoadShader("resize_canvas");
 
     stbi_set_flip_vertically_on_load(true);
     ImageRenderer::Init();
@@ -84,6 +85,8 @@ int Application::m_Main()
     //Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
 
     glm::vec2 prevPos = m_window.CursorPos();
+    glm::vec2 prevSize = canvas.Size();
+
     double t = glfwGetTime();
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
@@ -95,14 +98,30 @@ int Application::m_Main()
             prevPos = m_window.CursorPos();
         } else if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
             auto mPos = m_window.CursorPos();
-            /*auto pixels = utils::PlotLine({prevPos.x, prevPos.y}, {mPos.x, mPos.y});
-            for (auto& i : pixels)
-                canvas.SetPixel(i, {0, 0, 0}); */
-            canvas.SetLine(prevPos, mPos, {0, 1, 1});
-            //canvas.SetPixel(mPos, {0, 0, 0});
+            canvas.SetLine(prevPos, mPos, {0, 1, 1}, img.Size());
             img.SetTexture(canvas.GetTexture());
             prevPos = mPos;
         }
+
+        if (m_window.KeyPressed(GLFW_KEY_X) == ButtonState::HOLD) {
+            canvas.Resize({prevSize.x + 1, prevSize.y});
+            img.SetTexture(canvas.GetTexture());
+            prevSize = canvas.Size();
+            fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
+        }
+
+        if (m_window.KeyPressed(GLFW_KEY_Z) == ButtonState::PRESS) {
+            canvas.Resize({prevSize.x - 1, prevSize.y});
+            img.SetTexture(canvas.GetTexture());
+            prevSize = canvas.Size();
+            fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
+        }
+
+        if (m_window.KeyPressed(GLFW_KEY_Q))
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        if (m_window.KeyPressed(GLFW_KEY_W))
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
         img.Draw();
 
         m_window.SwapBuffers();
