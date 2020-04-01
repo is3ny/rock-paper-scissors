@@ -182,15 +182,27 @@ Texture& Canvas::getTexture()
     return m_texBuf[0];
 }
 
-void Canvas::GenerateTexture(Texture& out) const
+void Canvas::GenerateTexture(Texture& out)
 {
-    /*
     Framebuffer fbo(m_size);
     fbo.AttachTexture(Framebuffer::COLOR, out);
 
     if (!out.Valid() || out.Size() != m_size)
-        out.Generate(m_size, nullptr, m_texConf
-    */
+        out.Generate(m_size, nullptr, m_texConf);
+
+    auto shader = ResourceManager::GetShader("canvas_out");
+    
+    //
+    // Logic surrounding texture Buffer for color management
+    //
+
+    fbo.Bind();
+    m_vao.Bind();    
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    fbo.Unbind();
+    VertexArray::BindDefault();
 }
 
 

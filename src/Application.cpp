@@ -69,6 +69,8 @@ int Application::m_Init()
     ResourceManager::LoadShader("draw_pixel");
     ResourceManager::LoadShader("draw_line");
     ResourceManager::LoadShader("resize_canvas");
+    ResourceManager::LoadShader("canvas_out");
+    
 
     stbi_set_flip_vertically_on_load(true);
     ImageRenderer::Init();
@@ -81,10 +83,9 @@ int Application::m_Main()
 
     
     Canvas canvas({m_window.Width(), m_window.Height()});
-    //Image img({0, 0}, {500, 600}, Texture());
+    canvas.SetPalette({{1,1,1}, {1, 0, 0}});
+
     Image img({0, 0}, {500, 600}, canvas.GetTexture());
-    // canvas.GenerateTexture(img.GetTexture());
-    //Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
 
     glm::vec2 prevPos = m_window.CursorPos();
     glm::vec2 prevWinSize = m_window.Size();
@@ -100,7 +101,7 @@ int Application::m_Main()
             prevPos = m_window.CursorPos();
         } else if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
             auto mPos = m_window.CursorPos();
-            canvas.SetLine(prevPos, mPos, {0, 1, 1}, m_window.Size()); 
+            canvas.SetLine(prevPos, mPos, {1, 10}, m_window.Size());
             img.SetTexture(canvas.GetTexture());
             // canvas.GenerateTexture(img.GetTexture());
             prevPos = mPos;

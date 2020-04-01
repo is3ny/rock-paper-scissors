@@ -17,14 +17,16 @@ public:
     void SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 inputSize = {0, 0});
     void Resize(glm::uvec2 newSize);
 
-    void GenerateTexture(Texture& out) const;
+    void GenerateTexture(Texture& out);  // TODO: Maybe this function ideally should be const
     const Texture& GetTexture() const { return m_texBuf[0]; }
     glm::vec2 Size() const { return m_size; }
 
 private:
     glm::uvec2 m_size;
-    
-    VertexBuffer m_vbo;
+
+    // General quad spaning entire screen with appropriate texture coords
+    // TODO: Refactor them out.
+    VertexBuffer m_vbo; 
     VertexArray m_vao;
 
     // 0 -- ready texture, 1 -- the render target
