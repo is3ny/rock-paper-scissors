@@ -10,14 +10,14 @@ Canvas::Canvas(glm::uvec2 size)
 {
     m_size = size;
 
-    TextureProperties texConf;
-    texConf.magFilter = GL_LINEAR;
-    texConf.minFilter = GL_LINEAR;
-    texConf.internalFormat = texConf.imageFormat = GL_RGB;
+    TextureProperties m_texConf;
+    m_texConf.magFilter = GL_LINEAR;
+    m_texConf.minFilter = GL_LINEAR;
+    m_texConf.internalFormat = m_texConf.imageFormat = GL_RGB;
 
     // By passing nullptr we are telling GPU to just allocate the memory
-    m_texBuf[0].Generate(m_size, nullptr, texConf);
-    m_texBuf[1].Generate(m_size, nullptr, texConf);
+    m_texBuf[0].Generate(m_size, nullptr, m_texConf);
+    m_texBuf[1].Generate(m_size, nullptr, m_texConf);
 
     std::vector<GLfloat> quad = {
      //  X     Y     S     T
@@ -107,7 +107,7 @@ void Canvas::Resize(glm::uvec2 newSize)
 
     // TODO: TextureProperties probably have to be exported to the private
     // class member.
-    m_texBuf[1].Generate(newSize, nullptr, TextureProperties());
+    m_texBuf[1].Generate(newSize, nullptr, m_texConf);
 
     Framebuffer fbo(newSize);
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
@@ -173,7 +173,7 @@ void Canvas::Resize(glm::uvec2 newSize)
     fmt::print("New = {} {}\n", m_texBuf[0].ID(), m_texBuf[1].ID());
 
     // The texture to be rendered next also has to have new dimensions
-    m_texBuf[1].Generate(newSize, nullptr, TextureProperties());
+    m_texBuf[1].Generate(newSize, nullptr, m_texConf);
 
     m_size = newSize;
 }
@@ -190,7 +190,7 @@ void Canvas::GenerateTexture(Texture& out) const
     fbo.AttachTexture(Framebuffer::COLOR, out);
 
     if (!out.Valid() || out.Size() != m_size)
-        out.Generate(m_size, nullptr, texConf
+        out.Generate(m_size, nullptr, m_texConf
     */
 }
 
