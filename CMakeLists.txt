@@ -14,21 +14,21 @@ endif ()
 
 
 
-message("Building GLFW...")
+message("Configuring GLFW...")
 set(GLFW_BUILD_EXAMPLES OFF)
 set(GLFW_BUILD_TESTS OFF)
 set(GLFW_BUILD_DOCS OFF)
 set(GLFW_INSTALL OFF)
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/glfw)
 
-message("Building fmt...")
+message("Configuring fmt...")
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/fmt)
 
-message("Building GLM...")
+message("Configuring GLM...")
 set(BUILD_STATIC_LIBS ON)
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/glm/glm)
 
-message("Building GLAD loader...")
+message("Configuring GLAD loader...")
 set(GLAD_PROFILE core)
 set(GLAD_API gl=3.3)
 set(GLAD_GENERATOR c)
@@ -54,7 +54,7 @@ endif()
 message(STATUS "stb_image in ${STB_IMAGE_INCLUDE_PATH}")
 
 
-message("Building project...")
+message("Configuring project...")
 file(GLOB SRC CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*)
 
 add_executable(${PROJECT_NAME} ${SRC})

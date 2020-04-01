@@ -81,11 +81,13 @@ int Application::m_Main()
 
     
     Canvas canvas({m_window.Width(), m_window.Height()});
+    //Image img({0, 0}, {500, 600}, Texture());
     Image img({0, 0}, {500, 600}, canvas.GetTexture());
+    // canvas.GenerateTexture(img.GetTexture());
     //Image img({0, 0}, {m_window.Width(), m_window.Height()}, "test.jpg");
 
     glm::vec2 prevPos = m_window.CursorPos();
-    glm::vec2 prevSize = canvas.Size();
+    glm::vec2 prevWinSize = m_window.Size();
 
     double t = glfwGetTime();
     while (!m_window.ShouldClose()) {
@@ -100,35 +102,36 @@ int Application::m_Main()
             auto mPos = m_window.CursorPos();
             canvas.SetLine(prevPos, mPos, {0, 1, 1}, m_window.Size()); 
             img.SetTexture(canvas.GetTexture());
+            // canvas.GenerateTexture(img.GetTexture());
             prevPos = mPos;
         }
 
         if (m_window.KeyPressed(GLFW_KEY_LEFT) == ButtonState::HOLD) {
-            canvas.Resize({prevSize.x + 1, prevSize.y});
+            canvas.Resize({canvas.Size().x + 1, canvas.Size().y});
+            // canvas.GenerateTexture(img.GetTexture());
             img.SetTexture(canvas.GetTexture());
-            prevSize = canvas.Size();
-            fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
+            fmt::print(stderr, "\rsize: {} x {}", canvas.Size().x, canvas.Size().y);
         }
 
         if (m_window.KeyPressed(GLFW_KEY_RIGHT) == ButtonState::HOLD) {
-            canvas.Resize({prevSize.x - 1, prevSize.y});
+            canvas.Resize({canvas.Size().x - 1, canvas.Size().y});
+            // canvas.GenerateTexture(img.GetTexture());
             img.SetTexture(canvas.GetTexture());
-            prevSize = canvas.Size();
-            fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
+            fmt::print(stderr, "\rsize: {} x {}", canvas.Size().x, canvas.Size().y);
         }
 
         if (m_window.KeyPressed(GLFW_KEY_DOWN) == ButtonState::HOLD) {
-            canvas.Resize({prevSize.x, prevSize.y - 1});
+            canvas.Resize({canvas.Size().x, canvas.Size().y - 1});
+            // canvas.GenerateTexture(img.GetTexture());
             img.SetTexture(canvas.GetTexture());
-            prevSize = canvas.Size();
-            fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
+            fmt::print(stderr, "\rsize: {} x {}", canvas.Size().x, canvas.Size().y);
         }
 
         if (m_window.KeyPressed(GLFW_KEY_UP) == ButtonState::HOLD) {
-            canvas.Resize({prevSize.x, prevSize.y + 1});
+            canvas.Resize({canvas.Size().x, canvas.Size().y + 1});
+            // canvas.GenerateTexture(img.GetTexture());
             img.SetTexture(canvas.GetTexture());
-            prevSize = canvas.Size();
-            fmt::print(stderr, "\rsize: {} x {}", prevSize.x, prevSize.y);
+            fmt::print(stderr, "\rsize: {} x {}", canvas.Size().x, canvas.Size().y);
         }
         if (m_window.KeyPressed(GLFW_KEY_Q))
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

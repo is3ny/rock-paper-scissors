@@ -6,7 +6,7 @@
 #include "Canvas.hpp"
 
 
-Canvas::Canvas(glm::vec2 size)
+Canvas::Canvas(glm::uvec2 size)
 {
     m_size = size;
 
@@ -97,7 +97,7 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 
     VertexArray::BindDefault();
 }
 
-void Canvas::Resize(glm::vec2 newSize)
+void Canvas::Resize(glm::uvec2 newSize)
 {
 
     // 1. Clear texture and allocate for new dimension
@@ -117,7 +117,7 @@ void Canvas::Resize(glm::vec2 newSize)
 
     glm::mat4 proj(1.0);
     proj = glm::translate(proj, {-1, 1, 0});
-    proj = glm::scale(proj, {2 * m_size.x / newSize.x, 2 * m_size.y / newSize.y, 0});
+    proj = glm::scale(proj, {2.0f * m_size.x / newSize.x, 2.0f * m_size.y / newSize.y, 0});
 
     // (0, 0) -- (1, -1)
     std::vector<GLfloat> quad = {
@@ -178,14 +178,20 @@ void Canvas::Resize(glm::vec2 newSize)
     m_size = newSize;
 }
 
-const Texture& Canvas::GetTexture() const
+Texture& Canvas::getTexture()
 {
     return m_texBuf[0];
 }
 
-Texture& Canvas::getTexture()
+void Canvas::GenerateTexture(Texture& out) const
 {
-    return m_texBuf[0];
+    /*
+    Framebuffer fbo(m_size);
+    fbo.AttachTexture(Framebuffer::COLOR, out);
+
+    if (!out.Valid() || out.Size() != m_size)
+        out.Generate(m_size, nullptr, texConf
+    */
 }
 
 

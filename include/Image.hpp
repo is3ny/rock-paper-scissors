@@ -35,7 +35,9 @@ public:
         m_size = size;
     }
 
-    const Texture& GetTexture()
+    // TODO: getters supposed to return const values. I think I need to
+    // rework how canvas outputs the 
+    Texture& GetTexture()
     {
         return m_texture;
     }

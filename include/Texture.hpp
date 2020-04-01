@@ -27,6 +27,7 @@ public:
     GLuint ID() const                    { return m_id; }
     glm::uvec2 Size() const              { return m_size; }
     TextureProperties Properties() const { return m_props; }
+    bool Valid() const                   { return m_id != -1; }
 
     static void BindCustom(GLuint name);
 
