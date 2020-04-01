@@ -7,6 +7,7 @@
 #include "Framebuffer.hpp"
 #include "VertexBuffer.hpp"
 #include "VertexArray.hpp"
+#include "BufferTexture.hpp"
 
 class Canvas
 {
@@ -14,11 +15,14 @@ public:
     Canvas() = default;
     Canvas(glm::uvec2 size);
 
-    void SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 inputSize = {0, 0});
+    void SetLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::vec2 inputSize = {0, 0});
     void Resize(glm::uvec2 newSize);
+
+    void SetPalette(const std::vector<glm::vec3>& newPalette);
 
     void GenerateTexture(Texture& out);  // TODO: Maybe this function ideally should be const
     const Texture& GetTexture() const { return m_texBuf[0]; }
+
     glm::vec2 Size() const { return m_size; }
 
 private:
@@ -33,6 +37,16 @@ private:
     std::vector<Texture> m_texBuf{2};
     TextureProperties m_texConf;
 
+    Shader m_drawLineSH;
+    Shader m_resizeCanvasSH;
+    Shader m_outCanvasSH;
+
+    GLuint m_lastPaletteIndex = 0;
+    BufferTexture m_paletteBT;
+
     // HACK: some functions need a non-const texture
     Texture& getTexture();
+
+    // HACK: Hardcoded maximum value of cell's HPs
+    static int m_maxLives;
 };

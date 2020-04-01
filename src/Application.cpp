@@ -83,12 +83,15 @@ int Application::m_Main()
 
     
     Canvas canvas({m_window.Width(), m_window.Height()});
-    canvas.SetPalette({{1,1,1}, {1, 0, 0}});
+    canvas.SetPalette({{1,1,1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}});
+    int pickedColor = 1;
 
     Image img({0, 0}, {500, 600}, canvas.GetTexture());
 
     glm::vec2 prevPos = m_window.CursorPos();
     glm::vec2 prevWinSize = m_window.Size();
+
+    Texture canvasOutput;
 
     double t = glfwGetTime();
     while (!m_window.ShouldClose()) {
@@ -101,7 +104,7 @@ int Application::m_Main()
             prevPos = m_window.CursorPos();
         } else if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
             auto mPos = m_window.CursorPos();
-            canvas.SetLine(prevPos, mPos, {1, 10}, m_window.Size());
+            canvas.SetLine(prevPos, mPos, {pickedColor, 10}, m_window.Size());
             img.SetTexture(canvas.GetTexture());
             // canvas.GenerateTexture(img.GetTexture());
             prevPos = mPos;
@@ -138,6 +141,20 @@ int Application::m_Main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         if (m_window.KeyPressed(GLFW_KEY_W))
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        if (m_window.KeyPressed(GLFW_KEY_R) == ButtonState::PRESS) {
+            canvas.GenerateTexture(canvasOutput);
+            img.SetTexture(canvasOutput);
+        }
+
+        if (m_window.KeyPressed(GLFW_KEY_1) == ButtonState::PRESS)
+            pickedColor = 0;
+        if (m_window.KeyPressed(GLFW_KEY_2) == ButtonState::PRESS)
+            pickedColor = 1;
+        if (m_window.KeyPressed(GLFW_KEY_3) == ButtonState::PRESS)
+            pickedColor = 2;
+        if (m_window.KeyPressed(GLFW_KEY_4) == ButtonState::PRESS)
+            pickedColor = 3;
 
         img.SetSize(m_window.Size());
         img.Draw();

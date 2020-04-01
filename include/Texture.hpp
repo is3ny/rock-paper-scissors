@@ -22,7 +22,7 @@ public:
     // The only way to acquire an ID for the texture
     void Generate(glm::uvec2 size, const void* data, TextureProperties props);
     // Binds the texture as the current GL_TEXTURE_2D texture object
-    void Bind() const;
+    void Bind(GLint unit = -1) const;
 
     GLuint ID() const                    { return m_id; }
     glm::uvec2 Size() const              { return m_size; }
@@ -30,6 +30,7 @@ public:
     bool Valid() const                   { return m_id != -1; }
 
     static void BindCustom(GLuint name);
+    static void BindCustom(GLuint name, GLuint unit);
 
 private:
     GLuint m_id;

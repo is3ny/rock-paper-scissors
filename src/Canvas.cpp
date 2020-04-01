@@ -5,10 +5,15 @@
 
 #include "Canvas.hpp"
 
+int Canvas::m_maxLives = 10;
 
 Canvas::Canvas(glm::uvec2 size)
 {
     m_size = size;
+
+    m_drawLineSH = ResourceManager::GetShader("draw_line");
+    m_resizeCanvasSH = ResourceManager::GetShader("resize_canvas");
+    m_outCanvasSH = ResourceManager::GetShader("canvas_out");
 
     m_texConf.magFilter = GL_NEAREST;
     m_texConf.minFilter = GL_NEAREST;
@@ -28,8 +33,7 @@ Canvas::Canvas(glm::uvec2 size)
         -1.0, -1.0,  0.0,  0.0
     };
 
-    // TODO: Make stream draw
-    m_vbo.BufferData(quad, VertexBuffer::STATIC_DRAW);
+    m_vbo.BufferData(quad, VertexBuffer::STREAM_DRAW);
     m_vao.SetAttribute(0, VertexArray::VEC4, m_vbo);
 
     Framebuffer fbo;
@@ -37,10 +41,12 @@ Canvas::Canvas(glm::uvec2 size)
 
     m_vao.Bind();
 
+    ResourceManager::GetShader("image").Use();
+
     // This will basically fill the texture with the clear color
     // But the drawArrays call is still needed
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[0]);
-    glClearColor(1, 1, 1, 1);
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -53,7 +59,7 @@ Canvas::Canvas(glm::uvec2 size)
     fbo.Unbind();
 }
 
-void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 inputSize)
+void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::vec2 inputSize)
 {
     // We are working in NDC not in texture coordinates here...
     // We'll convert from the UI coords to NDC: y-inversions welcome!
@@ -76,10 +82,12 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec3 color, glm::vec2 
     VertexArray vao;
     vao.SetAttribute(0, VertexArray::VEC2, lineVBO);
 
-    auto shader = ResourceManager::GetShader("draw_line");
-    shader.Use();
-    shader.SetUniform("desiredColor", color);
-    shader.SetUniform("proj", proj);
+    // This relies on the fact that cellInfo is a float vec
+    glm::vec3 cellColor(cellInfo.x / m_lastPaletteIndex, cellInfo.y / m_maxLives, 0);
+
+    m_drawLineSH.Use();
+    m_drawLineSH.SetUniform("desiredColor", cellColor);
+    m_drawLineSH.SetUniform("proj", proj);
 
     // Make framebuffer output to the currently available texture, and then
     // switch back
@@ -118,7 +126,7 @@ void Canvas::Resize(glm::uvec2 newSize)
     proj = glm::translate(proj, {-1, 1, 0});
     proj = glm::scale(proj, {2.0f * m_size.x / newSize.x, 2.0f * m_size.y / newSize.y, 0});
 
-    // (0, 0) -- (1, -1)
+    // Rect corners: (0, 0) and (1, -1)
     std::vector<GLfloat> quad = {
      //  X     Y     S     T
          0.0,  0.0,
@@ -150,9 +158,8 @@ void Canvas::Resize(glm::uvec2 newSize)
     vao.SetAttribute(0, VertexArray::VEC2, quadVBO);
     vao.SetAttribute(1, VertexArray::VEC2, texCoordVBO);
 
-    auto shader = ResourceManager::GetShader("resize_canvas");
-    shader.Use();
-    shader.SetUniform("proj", proj);
+    m_resizeCanvasSH.Use();
+    m_resizeCanvasSH.SetUniform("proj", proj);
     
     fbo.Bind();
     vao.Bind();
@@ -184,25 +191,48 @@ Texture& Canvas::getTexture()
 
 void Canvas::GenerateTexture(Texture& out)
 {
-    Framebuffer fbo(m_size);
-    fbo.AttachTexture(Framebuffer::COLOR, out);
-
     if (!out.Valid() || out.Size() != m_size)
         out.Generate(m_size, nullptr, m_texConf);
 
-    auto shader = ResourceManager::GetShader("canvas_out");
-    
-    //
-    // Logic surrounding texture Buffer for color management
-    //
+    Framebuffer fbo(m_size);
+    fbo.AttachTexture(Framebuffer::COLOR, out);
 
+
+    //auto shader = ResourceManager::GetShader("canvas_out");
+    m_outCanvasSH.Use();
+    m_outCanvasSH.SetUniform("palette", 1);
+    
     fbo.Bind();
     m_vao.Bind();    
+
+    m_paletteBT.Bind(1);
+    m_texBuf[0].Bind(0);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     fbo.Unbind();
     VertexArray::BindDefault();
+}
+
+void Canvas::SetPalette(const std::vector<glm::vec3>& newPalette)
+{
+    m_lastPaletteIndex = newPalette.size() - 1;
+
+    std::vector<GLubyte> palette(4 * newPalette.size());
+    for (int pi = 0; pi < newPalette.size(); ++pi) {
+        for (int off = 0; off < 3; ++off)
+            palette[4 * pi + off] = round(255 * newPalette[pi][off]);
+
+        palette[4 * pi + 3] = 255;    // Alpha component
+    }
+
+    // Even though we don't need alpha channel, it turns out RGBA8 is the best
+    // option here, since it's smaller than all image formats with 3 components
+    // and the uintegers are normalized.
+    m_paletteBT.Generate(palette, GL_RGBA8);
+
+    m_outCanvasSH.Use();
+    m_outCanvasSH.SetUniform("lastPaletteIndex", m_lastPaletteIndex);
 }
 
 

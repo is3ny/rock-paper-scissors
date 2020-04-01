@@ -75,6 +75,11 @@ void Shader::setUniform(GLint loc, GLint value) const
     glUniform1i(loc, value);
 }
 
+void Shader::setUniform(GLint loc, GLuint value) const
+{
+    glUniform1ui(loc, value);
+}
+
 void Shader::setUniform(GLint loc, const glm::vec2& value) const
 {
     glUniform2f(loc, value.x, value.y);

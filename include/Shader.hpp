@@ -47,6 +47,7 @@ private:
 
     void setUniform(GLint loc, GLfloat value) const;
     void setUniform(GLint loc, GLint value) const;
+    void setUniform(GLint loc, GLuint value) const;
     void setUniform(GLint loc, const glm::vec2& value) const;
     void setUniform(GLint loc, const glm::vec3& value) const;
     void setUniform(GLint loc, const glm::vec4& value) const;

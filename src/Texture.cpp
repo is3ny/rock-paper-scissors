@@ -36,13 +36,22 @@ void Texture::Generate(glm::uvec2 size, const void* data, TextureProperties prop
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::Bind() const {
+void Texture::Bind(GLint unit) const {
     if (m_id == -1)
         throw std::runtime_error("Trying to bind uninitialized texture");
 
-    BindCustom(m_id);
+    if (unit != -1)
+        BindCustom(m_id, unit);
+    else
+        BindCustom(m_id);
+    
 }
 
+void Texture::BindCustom(GLuint name, GLuint unit)
+{
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, name);
+}
 
 void Texture::BindCustom(GLuint name)
 {
