@@ -5,7 +5,7 @@ out vec4 outColor;
 
 uniform sampler2D automataTex;
 uniform samplerBuffer palette;
-uniform uint lastPaletteIndex;
+uniform int lastPaletteIndex;
 
 void main()
 {

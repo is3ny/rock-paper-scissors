@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <random>
+#include <ctime>
 
 #include "glm/glm.hpp"
 #include "Texture.hpp"
@@ -19,6 +21,7 @@ public:
     void Resize(glm::uvec2 newSize);
 
     void SetPalette(const std::vector<glm::vec3>& newPalette);
+    void Step();
 
     void GenerateTexture(Texture& out);  // TODO: Maybe this function ideally should be const
     const Texture& GetTexture() const { return m_texBuf[0]; }
@@ -40,13 +43,22 @@ private:
     Shader m_drawLineSH;
     Shader m_resizeCanvasSH;
     Shader m_outCanvasSH;
+    Shader m_stepSH;
 
-    GLuint m_lastPaletteIndex = 0;
+    GLint m_lastPaletteIndex = 0;
     BufferTexture m_paletteBT;
+
+    GLuint m_dsSize = 0;
+    BufferTexture m_dsBT;
+
+    BufferTexture m_feedRuleBT;
+
+    std::mt19937 m_rd{time(0)};
+    
 
     // HACK: some functions need a non-const texture
     Texture& getTexture();
 
-    // HACK: Hardcoded maximum value of cell's HPs
-    static int m_maxLives;
+    // HACK(Temporary): Hardcoded maximum value of cell's HPs
+    static GLint m_maxLives;
 };

@@ -70,6 +70,7 @@ int Application::m_Init()
     ResourceManager::LoadShader("draw_line");
     ResourceManager::LoadShader("resize_canvas");
     ResourceManager::LoadShader("canvas_out");
+    ResourceManager::LoadShader("step");
     
 
     stbi_set_flip_vertically_on_load(true);
@@ -94,6 +95,7 @@ int Application::m_Main()
     Texture canvasOutput;
 
     double t = glfwGetTime();
+    int frameCount = 0;
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 
@@ -156,13 +158,25 @@ int Application::m_Main()
         if (m_window.KeyPressed(GLFW_KEY_4) == ButtonState::PRESS)
             pickedColor = 3;
 
+        if (m_window.KeyPressed(GLFW_KEY_S) == ButtonState::HOLD) {
+            canvas.Step();
+            //canvas.GenerateTexture(canvasOutput);
+            //img.SetTexture(canvasOutput);
+            img.SetTexture(canvas.GetTexture());
+        }
+
         img.SetSize(m_window.Size());
         img.Draw();
 
         m_window.SwapBuffers();
+        frameCount++;
+
         double nt = glfwGetTime();
-        //fmt::printf("%f\n", nt - t);
-        t = nt;
+        if (nt - t >= 1) {
+            fmt::print(stderr, "\r{} fps", frameCount);
+            t = nt;
+            frameCount = 0;
+        }
     }
 
     return 0;

@@ -5,7 +5,7 @@
 
 #include "Canvas.hpp"
 
-int Canvas::m_maxLives = 10;
+GLint Canvas::m_maxLives = 10;
 
 Canvas::Canvas(glm::uvec2 size)
 {
@@ -14,6 +14,7 @@ Canvas::Canvas(glm::uvec2 size)
     m_drawLineSH = ResourceManager::GetShader("draw_line");
     m_resizeCanvasSH = ResourceManager::GetShader("resize_canvas");
     m_outCanvasSH = ResourceManager::GetShader("canvas_out");
+    m_stepSH = ResourceManager::GetShader("step");
 
     m_texConf.magFilter = GL_NEAREST;
     m_texConf.minFilter = GL_NEAREST;
@@ -46,7 +47,7 @@ Canvas::Canvas(glm::uvec2 size)
     // This will basically fill the texture with the clear color
     // But the drawArrays call is still needed
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[0]);
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0, 1, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -57,6 +58,32 @@ Canvas::Canvas(glm::uvec2 size)
 
     VertexArray::BindDefault();
     fbo.Unbind();
+
+    std::vector<GLubyte> ds = {
+        255, 128,
+        255, 255,
+        128, 255,
+          0, 255,
+          0, 128,
+          0,   0,
+        128,   0,
+        255,   0 
+    };
+    m_dsBT.Generate(ds, GL_RG8);
+
+
+    std::vector<GLubyte> feedMap = {
+        0, 0, 0, 0,
+        1, 0, 1, 0,
+        1, 0, 0, 1,
+        1, 1, 0, 0
+    };
+    m_feedRuleBT.Generate(feedMap, GL_R8);
+
+    m_stepSH.Use();
+    m_stepSH.SetUniform("dsSize", static_cast<GLint>(ds.size()) / 2);
+    m_stepSH.SetUniform("maxLives", m_maxLives);
+
 }
 
 void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::vec2 inputSize)
@@ -233,6 +260,64 @@ void Canvas::SetPalette(const std::vector<glm::vec3>& newPalette)
 
     m_outCanvasSH.Use();
     m_outCanvasSH.SetUniform("lastPaletteIndex", m_lastPaletteIndex);
+
+    m_stepSH.Use();
+    m_stepSH.SetUniform("lastColorIndex", m_lastPaletteIndex);
+    fmt::print("lastColorIndex = {}\n", m_lastPaletteIndex);
+}
+
+void Canvas::Step()
+{
+    glm::vec2 fs = m_size;  // HACK: WTF is this!? I didn't expect that I wouldn't be able to plug jush m_size down there!
+    std::vector<GLfloat> quad = {
+     //  X     Y     S     T
+         1.0,  1.0,  fs.x,  fs.y,
+        -1.0, -1.0,  0.0,  0.0,
+        -1.0,  1.0,  0.0,  fs.y,
+         1.0,  1.0,  fs.x,  fs.y,
+         1.0, -1.0,  fs.x,  0.0,
+        -1.0, -1.0,  0.0,  0.0
+    };
+
+    VertexBuffer vbo(quad, VertexBuffer::STREAM_DRAW);
+    VertexArray vao;
+    vao.SetAttribute(0, VertexArray::VEC4, vbo);
+
+    glm::mat4 toNDC = glm::ortho(0.0f, fs.x, 0.0f, fs.y, -1.0f, 1.0f);
+    glm::mat4 ndcToTex(1.0f);
+    ndcToTex = glm::translate(ndcToTex, {0.5, 0.5, 0});
+    ndcToTex = glm::scale(ndcToTex, {0.5, 0.5, 0});
+
+    glm::vec2 s, e;
+    s = ndcToTex * toNDC * glm::vec4(0, 0, 0, 1);
+    e = ndcToTex * toNDC * glm::vec4(fs, 0, 1);
+    fmt::print("Texel maps to ({}, {}) -- ({}, {})\n", s.x, s.y, e.x, e.y);
+
+    Framebuffer fbo(m_size);
+    fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
+
+    std::uniform_int_distribution<GLint> dist(0, m_size.x);
+    glm::vec2 seed(dist(m_rd), dist(m_rd));
+
+    m_stepSH.Use();
+    m_stepSH.SetUniform("toNDC", toNDC);
+    m_stepSH.SetUniform("ndcToTex", ndcToTex);
+    m_stepSH.SetUniform("seed", seed);
+    m_stepSH.SetUniform("ds", 1);
+    m_stepSH.SetUniform("feedRule", 2);
+
+    fbo.Bind();
+    vao.Bind();
+    m_dsBT.Bind(1);
+    m_feedRuleBT.Bind(2);
+    m_texBuf[0].Bind(0);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    VertexArray::BindDefault();
+    fbo.Unbind();
+
+    std::swap(m_texBuf[0], m_texBuf[1]);
 }
 
 
