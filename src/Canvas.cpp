@@ -10,9 +10,8 @@ Canvas::Canvas(glm::uvec2 size)
 {
     m_size = size;
 
-    TextureProperties m_texConf;
-    m_texConf.magFilter = GL_LINEAR;
-    m_texConf.minFilter = GL_LINEAR;
+    m_texConf.magFilter = GL_NEAREST;
+    m_texConf.minFilter = GL_NEAREST;
     m_texConf.internalFormat = m_texConf.imageFormat = GL_RGB;
 
     // By passing nullptr we are telling GPU to just allocate the memory
