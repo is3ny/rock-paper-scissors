@@ -19,4 +19,5 @@ void main()
     int id = int(round(cellInfo.x * lastPaletteIndex));
 
     outColor = texelFetch(palette, id);
+    //outColor = vec4(mix(outColor.x, vec4(1, 0, 1, 1), cellInfo.y), outColor.yzw);
 }

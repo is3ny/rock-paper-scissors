@@ -31,14 +31,22 @@ public:
     template<typename T>
     void SetUniform(const std::string& name, const T& value) const
     {
+        if (glGetError() != GL_NO_ERROR) {
+            fmt::print(stderr, "warning: lol\n");
+        }
         Use();
         GLint location = glGetUniformLocation(this->id_, name.data());
         if (location == -1) {
-            //fmt::print(stderr, "warning: Trying to assign a value to a uniform that doesn't exist: " + name + "\n");
+            fmt::print(stderr, "warning: Trying to assign a value to a uniform that doesn't exist: " + name + "\n");
             return;
         }
     
         setUniform(location, value); 
+
+        if (glGetError() != GL_NO_ERROR) {
+            fmt::print(stderr, "{}\n", __PRETTY_FUNCTION__);
+            fmt::print(stderr, "warning: could not assign uniform \"{}\"\n", name);
+        }
     }
 
 	void CheckCompileErrors(GLuint id, std::string type);

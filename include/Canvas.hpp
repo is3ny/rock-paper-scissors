@@ -54,6 +54,7 @@ private:
     BufferTexture m_feedRuleBT;
 
     std::mt19937 m_rd{time(0)};
+    Texture m_randomMap;
     
 
     // HACK: some functions need a non-const texture

@@ -83,19 +83,26 @@ int Application::m_Main()
     int frame = 1;
 
     
-    Canvas canvas({m_window.Width(), m_window.Height()});
+    //Canvas canvas({m_window.Width(), m_window.Height()});
+    //Canvas canvas({600, 600});
+    Canvas canvas({200, 200});
+    canvas.Resize({1000, 1000});
     canvas.SetPalette({{1,1,1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}});
     int pickedColor = 1;
 
     Image img({0, 0}, {500, 600}, canvas.GetTexture());
 
     glm::vec2 prevPos = m_window.CursorPos();
-    glm::vec2 prevWinSize = m_window.Size();
+    glm::ivec2 prevWinSize = m_window.Size();
 
     Texture canvasOutput;
 
     double t = glfwGetTime();
+    double dt = t;
     int frameCount = 0;
+    int stepCount = 0;
+    bool genTex = 0;
+    std::string statusLine;
     while (!m_window.ShouldClose()) {
         m_window.PollEvents();
 
@@ -112,6 +119,11 @@ int Application::m_Main()
             prevPos = mPos;
         }
 
+        if (prevWinSize != m_window.Size()) {
+            //canvas.Resize(canvas.Size() + (glm::vec2)(m_window.Size() - prevWinSize));
+            fmt::print(stderr, "\rsize: {} x {}", canvas.Size().x, canvas.Size().y);
+            prevWinSize = m_window.Size();
+        }
         if (m_window.KeyPressed(GLFW_KEY_LEFT) == ButtonState::HOLD) {
             canvas.Resize({canvas.Size().x + 1, canvas.Size().y});
             // canvas.GenerateTexture(img.GetTexture());
@@ -145,8 +157,7 @@ int Application::m_Main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         if (m_window.KeyPressed(GLFW_KEY_R) == ButtonState::PRESS) {
-            canvas.GenerateTexture(canvasOutput);
-            img.SetTexture(canvasOutput);
+            genTex ^= 1;
         }
 
         if (m_window.KeyPressed(GLFW_KEY_1) == ButtonState::PRESS)
@@ -159,9 +170,24 @@ int Application::m_Main()
             pickedColor = 3;
 
         if (m_window.KeyPressed(GLFW_KEY_S) == ButtonState::HOLD) {
+            float takes = 0;
+            double startTime = glfwGetTime();
+            while (glfwGetTime() - startTime < 1.0 / 80) {
+                canvas.Step();
+                stepCount++;
+                if (takes < 1e-6)
+                    takes = glfwGetTime() - startTime;
+            }
+            img.SetTexture(canvas.GetTexture());
+        } else {
             canvas.Step();
-            //canvas.GenerateTexture(canvasOutput);
-            //img.SetTexture(canvasOutput);
+            stepCount++;
+        }
+
+        if (genTex) {
+            canvas.GenerateTexture(canvasOutput);
+            img.SetTexture(canvasOutput);
+        } else {
             img.SetTexture(canvas.GetTexture());
         }
 
@@ -173,10 +199,15 @@ int Application::m_Main()
 
         double nt = glfwGetTime();
         if (nt - t >= 1) {
-            fmt::print(stderr, "\r{} fps", frameCount);
+            fmt::print(stderr, "\r{}", std::string(statusLine.size(), ' '));
+            statusLine = fmt::format("\r{} fps | {} steps", frameCount, stepCount);
+            fmt::print(stderr, "\r{}", statusLine);
+            m_window.SetTitle(fmt::format("{} fps | {} steps", frameCount, stepCount));
             t = nt;
             frameCount = 0;
+            stepCount = 0;
         }
+        dt = glfwGetTime();
     }
 
     return 0;

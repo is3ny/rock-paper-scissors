@@ -5,7 +5,7 @@
 
 #include "Canvas.hpp"
 
-GLint Canvas::m_maxLives = 10;
+GLint Canvas::m_maxLives = 5;
 
 Canvas::Canvas(glm::uvec2 size)
 {
@@ -19,6 +19,7 @@ Canvas::Canvas(glm::uvec2 size)
     m_texConf.magFilter = GL_NEAREST;
     m_texConf.minFilter = GL_NEAREST;
     m_texConf.internalFormat = m_texConf.imageFormat = GL_RGB;
+    //m_texConf.sWrap = m_texConf.tWrap = GL_CLAMP_TO_EDGE;
 
     // By passing nullptr we are telling GPU to just allocate the memory
     m_texBuf[0].Generate(m_size, nullptr, m_texConf);
@@ -61,12 +62,12 @@ Canvas::Canvas(glm::uvec2 size)
 
     std::vector<GLubyte> ds = {
         255, 128,
-        255, 255,
         128, 255,
-          0, 255,
           0, 128,
-          0,   0,
         128,   0,
+        255, 255,
+          0, 255,
+          0,   0,
         255,   0 
     };
     m_dsBT.Generate(ds, GL_RG8);
@@ -74,9 +75,9 @@ Canvas::Canvas(glm::uvec2 size)
 
     std::vector<GLubyte> feedMap = {
         0, 0, 0, 0,
-        1, 0, 1, 0,
-        1, 0, 0, 1,
-        1, 1, 0, 0
+        255, 255, 255, 0,
+        255, 0, 255, 255,
+        255, 255, 0, 255
     };
     m_feedRuleBT.Generate(feedMap, GL_R8);
 
@@ -84,6 +85,21 @@ Canvas::Canvas(glm::uvec2 size)
     m_stepSH.SetUniform("dsSize", static_cast<GLint>(ds.size()) / 2);
     m_stepSH.SetUniform("maxLives", m_maxLives);
 
+
+    TextureProperties randMapProps;
+    randMapProps.internalFormat = randMapProps.imageFormat = GL_RED;
+
+    glm::uvec2 randSize{2000, 2000};
+    fmt::print(stderr, "Generating {}x{} random map...", randSize.x, randSize.y);
+    std::uniform_int_distribution<GLubyte> dist(0, 255);
+    std::vector<GLubyte> randMap(randSize.x * randSize.y);
+    for (int i = 0; i < randMap.size(); ++i) {
+        randMap[i] = dist(m_rd);
+    }
+    fmt::print("\n");
+
+    m_randomMap.Generate(randSize, &randMap[0], randMapProps);
+    fmt::print(stderr, "ok\n");
 }
 
 void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::vec2 inputSize)
@@ -279,7 +295,7 @@ void Canvas::Step()
         -1.0, -1.0,  0.0,  0.0
     };
 
-    VertexBuffer vbo(quad, VertexBuffer::STREAM_DRAW);
+    VertexBuffer vbo(quad, VertexBuffer::STATIC_DRAW);
     VertexArray vao;
     vao.SetAttribute(0, VertexArray::VEC4, vbo);
 
@@ -288,10 +304,12 @@ void Canvas::Step()
     ndcToTex = glm::translate(ndcToTex, {0.5, 0.5, 0});
     ndcToTex = glm::scale(ndcToTex, {0.5, 0.5, 0});
 
+/*
     glm::vec2 s, e;
     s = ndcToTex * toNDC * glm::vec4(0, 0, 0, 1);
     e = ndcToTex * toNDC * glm::vec4(fs, 0, 1);
     fmt::print("Texel maps to ({}, {}) -- ({}, {})\n", s.x, s.y, e.x, e.y);
+    */
 
     Framebuffer fbo(m_size);
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
@@ -305,12 +323,14 @@ void Canvas::Step()
     m_stepSH.SetUniform("seed", seed);
     m_stepSH.SetUniform("ds", 1);
     m_stepSH.SetUniform("feedRule", 2);
+    m_stepSH.SetUniform("randomMap", 3);
 
     fbo.Bind();
     vao.Bind();
     m_dsBT.Bind(1);
     m_feedRuleBT.Bind(2);
     m_texBuf[0].Bind(0);
+    m_randomMap.Bind(3);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
