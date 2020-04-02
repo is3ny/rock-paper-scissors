@@ -60,8 +60,8 @@ void main()
 
     // Determine the type of the selected cell
     int colorCount = lastColorIndex + 1;
-    int predator = int(texelFetch(feedRule, int(round(neigInfo.x * colorCount + cellInfo.x))).x);
-    int pray = int(texelFetch(feedRule, int(round(cellInfo.x * colorCount + neigInfo.x))).x);
+    int predator = int(texelFetch(feedRule, neigInfo.x * colorCount + cellInfo.x).x);
+    int pray = int(texelFetch(feedRule, cellInfo.x * colorCount + neigInfo.x).x);
 
     //if (predator == 1 || pray == 1)
 
