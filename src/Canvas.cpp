@@ -5,7 +5,7 @@
 
 #include "Canvas.hpp"
 
-GLint Canvas::m_maxLives = 5;
+GLint Canvas::m_maxLives = 20;
 
 Canvas::Canvas(glm::uvec2 size)
 {
@@ -75,9 +75,9 @@ Canvas::Canvas(glm::uvec2 size)
 
     std::vector<GLubyte> feedMap = {
         0, 0, 0, 0,
-        255, 255, 255, 0,
-        255, 0, 255, 255,
-        255, 255, 0, 255
+        255, 0, 255, 0,
+        255, 0, 0, 255,
+        255, 255, 0, 0
     };
     m_feedRuleBT.Generate(feedMap, GL_R8);
 
@@ -339,35 +339,3 @@ void Canvas::Step()
 
     std::swap(m_texBuf[0], m_texBuf[1]);
 }
-
-
-
-
-/*
-void Canvas::SetPixel(glm::vec2 pos, glm::vec3 color)
-{
-    pos += glm::vec2(0.5, 0.5);
-    glm::vec2 ndcPos(pos.x / m_size.x, 1 - pos.y / m_size.y);
-
-
-    //glBindVertexArray(vao);
-    vao.Bind();
-    auto shader = ResourceManager::GetShader("draw_pixel");
-    shader.Use();
-    shader.SetUniform("pixelPos", ndcPos);
-    shader.SetUniform("desiredColor", color);
-
-    fbo.Bind();
-    glClearColor(1, 1, 1, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    GetTexture().Bind();
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    VertexArray::BindDefault();
-
-    fbo.AttachTexture(Framebuffer::COLOR, GetTexture());
-    m_texSelected ^= 1;
-    Framebuffer::BindDefault();
-}
-*/

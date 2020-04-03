@@ -61,31 +61,15 @@ void main()
     // Determine the type of the selected cell
     int colorCount = lastColorIndex + 1;
     int predator = int(texelFetch(feedRule, neigInfo.x * colorCount + cellInfo.x).x);
-    int pray = int(texelFetch(feedRule, cellInfo.x * colorCount + neigInfo.x).x);
+    //int pray = int(texelFetch(feedRule, cellInfo.x * colorCount + neigInfo.x).x);
 
     //if (predator == 1 || pray == 1)
 
     ivec2 resultInfo;
-    if (pray == 1 && predator == 0) {
-        if (cellInfo.y < maxLives)
-            resultInfo = ivec2(cellInfo.x, cellInfo.y + 1);
-        else
-            resultInfo = cellInfo;
-    } else if (pray == 0 && predator == 1) {
-        //if (neigInfo.y > 0) {
-            if (cellInfo.y > 0)
-                resultInfo = ivec2(cellInfo.x, cellInfo.y - 1);
-            else {
-                resultInfo = ivec2(neigInfo.x, neigInfo.y);
-            }
-        //}
-    } else if (pray == 1 && predator == 1) {
-        if (cellInfo.y < maxLives)
-            resultInfo = ivec2(cellInfo.x, cellInfo.y);
-        else
-            resultInfo = cellInfo;
-    } else if (pray == 0 && predator == 0) {
-        resultInfo = cellInfo;
+    if (predator == 1 && cellInfo.y == 0) {
+        resultInfo = ivec2(neigInfo.x, maxLives);
+    } else if (cellInfo.y > 0) {
+        resultInfo = ivec2(cellInfo.x, cellInfo.y - 1);
     }
 
     outColor = vec4(float(resultInfo.x) / lastColorIndex, float(resultInfo.y) / maxLives, 0, 1);
