@@ -30,9 +30,9 @@ public:
 
     ~VertexBuffer()
     {
-        if (m_current == m_vbo) {
+        if (m_current == m_vbo)
             BindDefault();
-        }
+
         glDeleteBuffers(1, &m_vbo);
     }
 

@@ -78,6 +78,7 @@ int Application::m_Init()
     return 0;
 }
 
+// This function is a mess and right now is used only for testing purposes
 int Application::m_Main()
 {
     int frame = 1;
@@ -87,7 +88,7 @@ int Application::m_Main()
     //Canvas canvas({600, 600});
     Canvas canvas({200, 200});
     canvas.Resize({1000, 1000});
-    canvas.SetPalette({{1,1,1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}});
+    canvas.SetPalette({{0,0,0}, {0.1, 0, 0}, {0.2, 0, 0}, {0.3, 0, 0}});
     int pickedColor = 1;
 
     Image img({0, 0}, {500, 600}, canvas.GetTexture());
@@ -113,7 +114,7 @@ int Application::m_Main()
             prevPos = m_window.CursorPos();
         } else if (m_window.MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT) == ButtonState::HOLD) {
             auto mPos = m_window.CursorPos();
-            canvas.SetLine(prevPos, mPos, {pickedColor, 10}, m_window.Size());
+            canvas.DrawLine(prevPos, mPos, {pickedColor, 10}, m_window.Size());
             img.SetTexture(canvas.GetTexture());
             // canvas.GenerateTexture(img.GetTexture());
             prevPos = mPos;

@@ -5,7 +5,7 @@
 
 #include "Canvas.hpp"
 
-GLint Canvas::m_maxLives = 20;
+GLint Canvas::m_maxLives = 2;
 
 Canvas::Canvas(glm::uvec2 size)
 {
@@ -18,8 +18,8 @@ Canvas::Canvas(glm::uvec2 size)
 
     m_texConf.magFilter = GL_NEAREST;
     m_texConf.minFilter = GL_NEAREST;
-    m_texConf.internalFormat = m_texConf.imageFormat = GL_RGB;
-    //m_texConf.sWrap = m_texConf.tWrap = GL_CLAMP_TO_EDGE;
+    //m_texConf.internalFormat = m_texConf.imageFormat = GL_RGB;
+    m_texConf.sWrap = m_texConf.tWrap = GL_CLAMP_TO_EDGE;
 
     // By passing nullptr we are telling GPU to just allocate the memory
     m_texBuf[0].Generate(m_size, nullptr, m_texConf);
@@ -57,8 +57,6 @@ Canvas::Canvas(glm::uvec2 size)
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    VertexArray::BindDefault();
-    fbo.Unbind();
 
     std::vector<GLubyte> ds = {
         255, 128,
@@ -102,7 +100,7 @@ Canvas::Canvas(glm::uvec2 size)
     fmt::print(stderr, "ok\n");
 }
 
-void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::vec2 inputSize)
+void Canvas::DrawLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::vec2 inputSize)
 {
     // We are working in NDC not in texture coordinates here...
     // We'll convert from the UI coords to NDC: y-inversions welcome!
@@ -140,11 +138,6 @@ void Canvas::SetLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::ve
     vao.Bind();
 
     glDrawArrays(GL_LINES, 0, 2);
-
-    fbo.Unbind();
-
-    VertexBuffer::BindDefault();
-    VertexArray::BindDefault();
 }
 
 void Canvas::Resize(glm::uvec2 newSize)
@@ -159,6 +152,7 @@ void Canvas::Resize(glm::uvec2 newSize)
     // class member.
     m_texBuf[1].Generate(newSize, nullptr, m_texConf);
 
+    fmt::print("リサーイズ event start!\n");
     Framebuffer fbo(newSize);
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
 
@@ -214,8 +208,6 @@ void Canvas::Resize(glm::uvec2 newSize)
     // TODO: Replace with Triangle fan
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    VertexArray::BindDefault();
-    fbo.Unbind();
 
     //fmt::print("Old = {} {}", m_texBuf[0].ID());
     std::swap(m_texBuf[0], m_texBuf[1]);
@@ -225,6 +217,8 @@ void Canvas::Resize(glm::uvec2 newSize)
     m_texBuf[1].Generate(newSize, nullptr, m_texConf);
 
     m_size = newSize;
+
+    fmt::print("リサーイズ event end!\n");
 }
 
 Texture& Canvas::getTexture()
@@ -252,9 +246,6 @@ void Canvas::GenerateTexture(Texture& out)
     m_texBuf[0].Bind(0);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    fbo.Unbind();
-    VertexArray::BindDefault();
 }
 
 void Canvas::SetPalette(const std::vector<glm::vec3>& newPalette)
@@ -333,9 +324,6 @@ void Canvas::Step()
     m_randomMap.Bind(3);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    VertexArray::BindDefault();
-    fbo.Unbind();
 
     std::swap(m_texBuf[0], m_texBuf[1]);
 }

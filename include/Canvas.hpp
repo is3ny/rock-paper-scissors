@@ -17,7 +17,7 @@ public:
     Canvas() = default;
     Canvas(glm::uvec2 size);
 
-    void SetLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::vec2 inputSize = {0, 0});
+    void DrawLine(glm::vec2 start, glm::vec2 end, glm::vec2 cellInfo, glm::vec2 inputSize = {0, 0});
     void Resize(glm::uvec2 newSize);
 
     void SetPalette(const std::vector<glm::vec3>& newPalette);

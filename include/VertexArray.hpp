@@ -29,6 +29,9 @@ public:
     
     ~VertexArray()
     {
+        if (m_current == m_vao)
+            BindDefault();
+
         glDeleteVertexArrays(1, &m_vao);
     }
 
@@ -64,6 +67,7 @@ public:
     static void BindCustom(GLuint vao)
     {
         glBindVertexArray(vao);
+        m_current = vao;
     }
 
     static void BindDefault()

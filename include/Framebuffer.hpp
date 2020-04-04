@@ -44,8 +44,13 @@ public:
 
     ~Framebuffer()
     {
-        if (!m_foreign)
+        if (!m_foreign) {
+            fmt::print("Framebuffer destructor called -- bound = {}\n", m_bound);
+            fmt::print("Deleted {} framebuffer\n", m_fbo);
+            Unbind();
             glDeleteFramebuffers(1, &m_fbo);
+            //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
     }
 
     GLuint ID() const
@@ -65,20 +70,44 @@ public:
 
     void Bind()
     {
+        if (m_bound)
+            return;
+            
         auto cur = Current();
+
+        if (m_fbo == m_current) {
+            if (cur.GetViewport() != m_viewport)
+                utils::SetGlobalViewport(m_viewport);
+            return;
+        }
+
         m_prevFBO = cur.ID();
         m_prevViewport = cur.GetViewport();
 
+        fmt::print("FBO bound {} --> {} :: {}x{} --> {}x{}\n", m_current, m_fbo, m_prevViewport.z, m_prevViewport.w, m_viewport.z, m_viewport.w);
+        //fmt::print("FBO bound {} --> {}\n", m_current, m_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
         utils::SetGlobalViewport(m_viewport);
         m_current = m_fbo;
+        m_bound = true;
     }
 
     void Unbind()
     {
+        if (!m_bound || m_fbo != m_current)
+            return;
+
+        if (glGetError() != GL_NO_ERROR) {
+            fmt::print(stderr, "warning: Error before Unbind {}\n", m_prevFBO);
+        }
+        fmt::print("FBO unbound {} --> {} :: {}x{} --> {}x{}\n", m_current, m_prevFBO, m_viewport.z, m_viewport.w, m_prevViewport.z, m_prevViewport.w);
         glBindFramebuffer(GL_FRAMEBUFFER, m_prevFBO);
+        if (glGetError() != GL_NO_ERROR) {
+            fmt::print(stderr, "warning: Could not bind framebuffer {}\n", m_prevFBO);
+        }
         utils::SetGlobalViewport(m_prevViewport);
         m_current = m_prevFBO;
+        m_bound = false;
     }
 
     void AttachTexture(AttachmentType attachment, const Texture& texture)
@@ -111,6 +140,7 @@ private:
 
     GLuint m_prevFBO;
     glm::ivec4 m_prevViewport;
+    bool m_bound = false;
 
     // The expected way to acquire the name of the currently bound fbo is to
     // call glGetIntegerv(GL_FRAMEBUFFER_BINDING, ...), but it always returns zero
