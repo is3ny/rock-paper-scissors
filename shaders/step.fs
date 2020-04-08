@@ -22,16 +22,14 @@ uniform int maxLives;
 uniform vec2 seed;
 uniform sampler2D randomMap;
 
-uniform mat4 toNDC;
-uniform mat4 ndcToTex;
+uniform vec2 dpixel;
 
 uniform sampler2D automata;
 
 // 2D Random
-float Random (in vec2 st) {
-    vec2 seededCoord = st + seed;
-    vec2 txcoord = (ndcToTex * toNDC * vec4(seededCoord, 0, 1)).xy;
-    return texture(randomMap, txcoord).x;
+float Random (vec2 st) {
+    vec2 seededCoord = st + seed * dpixel;
+    return texture(randomMap, seededCoord).x;
 }
 
 ivec2 GetCellInfo(vec4 texel)
@@ -41,8 +39,7 @@ ivec2 GetCellInfo(vec4 texel)
 
 vec4 GetCellTexel(vec2 coord)
 {
-    vec4 tcoord = ndcToTex * toNDC * vec4(coord, 0, 1);
-    return texture(automata, tcoord.xy);
+    return texture(automata, coord);
 }
 
 void main()
@@ -52,7 +49,7 @@ void main()
 
     // Choose random neighbor
     int choice = int(round(Random(texCoord) * (dsSize - 1)));
-    vec2 shift = 2 * texelFetch(ds, choice).xy - vec2(1, 1);
+    vec2 shift = (2 * texelFetch(ds, choice).xy - vec2(1, 1)) * dpixel;
 
     // Get neighbor cell information
     vec4 neigTexel = GetCellTexel(texCoord + shift);

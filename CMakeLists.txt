@@ -68,8 +68,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/third_par
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/third_party/glad/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/include)
 
-
-
 # Copy resources to the binary directory
 message("Copying shaders...")
 file(GLOB SHADERS CONFIGURE_DEPENDS RELATIVE ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_SOURCE_DIR}/shaders/*) 

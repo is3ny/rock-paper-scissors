@@ -3,6 +3,7 @@
 GLuint ImageRenderer::m_quadVBO = 0;
 GLuint ImageRenderer::m_quadVAO = 0;
 
+// TODO: Refactor ImageRenderer using opengl primitives wrappers.
 void ImageRenderer::Init()
 {
     // Vertex data, the first vertex is at the top-left corner

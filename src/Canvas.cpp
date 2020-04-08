@@ -1,11 +1,12 @@
 #include "glad/glad.h"
 #include "fmt/format.h"
 
+#include "Mesh.hpp"
 #include "ResourceManager.hpp"
 
 #include "Canvas.hpp"
 
-GLint Canvas::m_maxLives = 2;
+GLint Canvas::m_maxLives = 10;
 
 Canvas::Canvas(glm::uvec2 size)
 {
@@ -25,17 +26,7 @@ Canvas::Canvas(glm::uvec2 size)
     m_texBuf[0].Generate(m_size, nullptr, m_texConf);
     m_texBuf[1].Generate(m_size, nullptr, m_texConf);
 
-    std::vector<GLfloat> quad = {
-     //  X     Y     S     T
-         1.0,  1.0,  1.0,  1.0,
-        -1.0, -1.0,  0.0,  0.0,
-        -1.0,  1.0,  0.0,  1.0,
-         1.0,  1.0,  1.0,  1.0,
-         1.0, -1.0,  1.0,  0.0,
-        -1.0, -1.0,  0.0,  0.0
-    };
-
-    m_vbo.BufferData(quad, VertexBuffer::STREAM_DRAW);
+    m_vbo.BufferData(mesh::screenQuadTx, VertexBuffer::STREAM_DRAW);
     m_vao.SetAttribute(0, VertexArray::VEC4, m_vbo);
 
     Framebuffer fbo;
@@ -58,6 +49,7 @@ Canvas::Canvas(glm::uvec2 size)
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
+    // The displacements for all 8 neigbors of a cell
     std::vector<GLubyte> ds = {
         255, 128,
         128, 255,
@@ -82,6 +74,7 @@ Canvas::Canvas(glm::uvec2 size)
     m_stepSH.Use();
     m_stepSH.SetUniform("dsSize", static_cast<GLint>(ds.size()) / 2);
     m_stepSH.SetUniform("maxLives", m_maxLives);
+    m_stepSH.SetUniform("dpixel", glm::vec2(1.0 / m_size.x, 1.0 / m_size.y));
 
 
     TextureProperties randMapProps;
@@ -148,8 +141,6 @@ void Canvas::Resize(glm::uvec2 newSize)
     // 3. Bind FBO, VAO and render
     // 4. Clean up
 
-    // TODO: TextureProperties probably have to be exported to the private
-    // class member.
     m_texBuf[1].Generate(newSize, nullptr, m_texConf);
 
     fmt::print("リサーイズ event start!\n");
@@ -183,11 +174,6 @@ void Canvas::Resize(glm::uvec2 newSize)
         1.0, 0.0
     };
 
-    glm::vec2 s, e;
-    s = proj * glm::vec4(0, 0, 0, 1);
-    e = proj * glm::vec4(1, -1, 0, 1);
-    fmt::print("\nTex rect: ({}, {}) -- ({}, {})\n", s.x, s.y, e.x, e.y);
-
     VertexBuffer quadVBO(quad, VertexBuffer::STREAM_DRAW);
     VertexBuffer texCoordVBO(texCoords, VertexBuffer::STREAM_DRAW);
 
@@ -217,6 +203,11 @@ void Canvas::Resize(glm::uvec2 newSize)
     m_texBuf[1].Generate(newSize, nullptr, m_texConf);
 
     m_size = newSize;
+
+    // Since resize events are fairly rare, it's more efficient to set
+    // pixel size in texture coords for the shaders here.
+    m_stepSH.Use();
+    m_stepSH.SetUniform("dpixel", glm::vec2(1.0 / m_size.x, 1.0 / m_size.y));
 
     fmt::print("リサーイズ event end!\n");
 }
@@ -275,32 +266,9 @@ void Canvas::SetPalette(const std::vector<glm::vec3>& newPalette)
 
 void Canvas::Step()
 {
-    glm::vec2 fs = m_size;  // HACK: WTF is this!? I didn't expect that I wouldn't be able to plug jush m_size down there!
-    std::vector<GLfloat> quad = {
-     //  X     Y     S     T
-         1.0,  1.0,  fs.x,  fs.y,
-        -1.0, -1.0,  0.0,  0.0,
-        -1.0,  1.0,  0.0,  fs.y,
-         1.0,  1.0,  fs.x,  fs.y,
-         1.0, -1.0,  fs.x,  0.0,
-        -1.0, -1.0,  0.0,  0.0
-    };
-
-    VertexBuffer vbo(quad, VertexBuffer::STATIC_DRAW);
+    VertexBuffer vbo(mesh::screenQuadTx, VertexBuffer::STATIC_DRAW);
     VertexArray vao;
     vao.SetAttribute(0, VertexArray::VEC4, vbo);
-
-    glm::mat4 toNDC = glm::ortho(0.0f, fs.x, 0.0f, fs.y, -1.0f, 1.0f);
-    glm::mat4 ndcToTex(1.0f);
-    ndcToTex = glm::translate(ndcToTex, {0.5, 0.5, 0});
-    ndcToTex = glm::scale(ndcToTex, {0.5, 0.5, 0});
-
-/*
-    glm::vec2 s, e;
-    s = ndcToTex * toNDC * glm::vec4(0, 0, 0, 1);
-    e = ndcToTex * toNDC * glm::vec4(fs, 0, 1);
-    fmt::print("Texel maps to ({}, {}) -- ({}, {})\n", s.x, s.y, e.x, e.y);
-    */
 
     Framebuffer fbo(m_size);
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
@@ -309,8 +277,6 @@ void Canvas::Step()
     glm::vec2 seed(dist(m_rd), dist(m_rd));
 
     m_stepSH.Use();
-    m_stepSH.SetUniform("toNDC", toNDC);
-    m_stepSH.SetUniform("ndcToTex", ndcToTex);
     m_stepSH.SetUniform("seed", seed);
     m_stepSH.SetUniform("ds", 1);
     m_stepSH.SetUniform("feedRule", 2);
@@ -318,9 +284,9 @@ void Canvas::Step()
 
     fbo.Bind();
     vao.Bind();
+    m_texBuf[0].Bind(0);
     m_dsBT.Bind(1);
     m_feedRuleBT.Bind(2);
-    m_texBuf[0].Bind(0);
     m_randomMap.Bind(3);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
