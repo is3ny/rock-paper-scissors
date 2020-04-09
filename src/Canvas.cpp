@@ -149,37 +149,14 @@ void Canvas::Resize(glm::uvec2 newSize)
 
     if (!fbo.IsComplete())
         fmt::print("Aha!\n");
+        
+    VertexBuffer vbo(mesh::oct4QuadTx, VertexBuffer::STREAM_DRAW);
+    VertexArray vao;
+    vao.SetAttribute(0, VertexArray::VEC4, vbo);
 
     glm::mat4 proj(1.0);
     proj = glm::translate(proj, {-1, 1, 0});
     proj = glm::scale(proj, {2.0f * m_size.x / newSize.x, 2.0f * m_size.y / newSize.y, 0});
-
-    // Rect corners: (0, 0) and (1, -1)
-    std::vector<GLfloat> quad = {
-     //  X     Y     S     T
-         0.0,  0.0,
-         1.0,  0.0,
-         0.0, -1.0,
-         1.0,  0.0,
-         0.0, -1.0,
-         1.0, -1.0
-    };
-
-    std::vector<GLfloat> texCoords = {
-        0.0, 1.0,
-        1.0, 1.0,
-        0.0, 0.0,
-        1.0, 1.0,
-        0.0, 0.0, 
-        1.0, 0.0
-    };
-
-    VertexBuffer quadVBO(quad, VertexBuffer::STREAM_DRAW);
-    VertexBuffer texCoordVBO(texCoords, VertexBuffer::STREAM_DRAW);
-
-    VertexArray vao;
-    vao.SetAttribute(0, VertexArray::VEC2, quadVBO);
-    vao.SetAttribute(1, VertexArray::VEC2, texCoordVBO);
 
     m_resizeCanvasSH.Use();
     m_resizeCanvasSH.SetUniform("proj", proj);
@@ -195,7 +172,6 @@ void Canvas::Resize(glm::uvec2 newSize)
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
-    //fmt::print("Old = {} {}", m_texBuf[0].ID());
     std::swap(m_texBuf[0], m_texBuf[1]);
     fmt::print("New = {} {}\n", m_texBuf[0].ID(), m_texBuf[1].ID());
 

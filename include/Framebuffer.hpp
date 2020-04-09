@@ -45,11 +45,8 @@ public:
     ~Framebuffer()
     {
         if (!m_foreign) {
-            fmt::print("Framebuffer destructor called -- bound = {}\n", m_bound);
-            fmt::print("Deleted {} framebuffer\n", m_fbo);
             Unbind();
             glDeleteFramebuffers(1, &m_fbo);
-            //glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
     }
 
@@ -84,8 +81,6 @@ public:
         m_prevFBO = cur.ID();
         m_prevViewport = cur.GetViewport();
 
-        fmt::print("FBO bound {} --> {} :: {}x{} --> {}x{}\n", m_current, m_fbo, m_prevViewport.z, m_prevViewport.w, m_viewport.z, m_viewport.w);
-        //fmt::print("FBO bound {} --> {}\n", m_current, m_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
         utils::SetGlobalViewport(m_viewport);
         m_current = m_fbo;
@@ -100,11 +95,12 @@ public:
         if (glGetError() != GL_NO_ERROR) {
             fmt::print(stderr, "warning: Error before Unbind {}\n", m_prevFBO);
         }
-        fmt::print("FBO unbound {} --> {} :: {}x{} --> {}x{}\n", m_current, m_prevFBO, m_viewport.z, m_viewport.w, m_prevViewport.z, m_prevViewport.w);
+
         glBindFramebuffer(GL_FRAMEBUFFER, m_prevFBO);
         if (glGetError() != GL_NO_ERROR) {
             fmt::print(stderr, "warning: Could not bind framebuffer {}\n", m_prevFBO);
         }
+        
         utils::SetGlobalViewport(m_prevViewport);
         m_current = m_prevFBO;
         m_bound = false;
