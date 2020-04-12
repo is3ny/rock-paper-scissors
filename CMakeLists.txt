@@ -3,7 +3,7 @@ project(rps VERSION 0.1.0 LANGUAGES CXX C)
 
 # The code snippet is taken from StackOverflow
 # Enables color output from ninja
-option (FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." TRUE)
+option (FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." FALSE)
 if (${FORCE_COLORED_OUTPUT})
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
        add_compile_options (-fdiagnostics-color=always)
@@ -59,7 +59,7 @@ file(GLOB SRC CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*)
 
 add_executable(${PROJECT_NAME} ${SRC})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_FLAGS -O2 -g)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -pg")
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} glm_static fmt glad)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/third_party/glfw/include/GLFW)

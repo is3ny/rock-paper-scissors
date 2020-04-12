@@ -11,6 +11,7 @@ GLint Canvas::m_maxLives = 10;
 Canvas::Canvas(glm::uvec2 size)
 {
     m_size = size;
+    m_rd = std::mt19937(time(0));
 
     m_drawLineSH = ResourceManager::GetShader("draw_line");
     m_resizeCanvasSH = ResourceManager::GetShader("resize_canvas");

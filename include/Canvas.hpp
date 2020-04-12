@@ -53,7 +53,7 @@ private:
 
     BufferTexture m_feedRuleBT;
 
-    std::mt19937 m_rd{time(0)};
+    std::mt19937 m_rd;
     Texture m_randomMap;
     
 
