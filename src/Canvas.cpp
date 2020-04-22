@@ -38,16 +38,13 @@ Canvas::Canvas(glm::uvec2 size)
     ResourceManager::GetShader("image").Use();
 
     // This will basically fill the texture with the clear color
-    // But the drawArrays call is still needed
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[0]);
     glClearColor(0, 1, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     fbo.AttachTexture(Framebuffer::COLOR, m_texBuf[1]);
     glClearColor(0, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
     // The displacements for all 8 neigbors of a cell
